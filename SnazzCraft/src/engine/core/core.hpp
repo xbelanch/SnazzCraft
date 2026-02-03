@@ -27,6 +27,7 @@
 #include "gui/main-menu-gui/main-menu-gui.hpp"
 #include "gui/world-gui/world-gui.hpp"
 #include "window/window.hpp"
+#include "../hitbox/hitbox.hpp"
 
 #ifdef _WIN32
     #define CLEAR_COMMAND "cls"

@@ -129,6 +129,7 @@ bool SnazzCraft::Initiate()
 
 void SnazzCraft::MainLoop()
 {
+    //SnazzCraft::TestHitbox->SetMesh();
     while (!glfwWindowShouldClose(SnazzCraft::Window) && !SnazzCraft::CloseApplication)
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -143,7 +144,7 @@ void SnazzCraft::MainLoop()
                 if (SnazzCraft::CurrentWorld == nullptr) break;
 
                 SnazzCraft::RenderWorld();
-         
+                //SnazzCraft::TestHitbox->Draw();
                 break;
 
             case SNAZZCRAFT_USER_MODE_MAIN_MENU:

@@ -7,7 +7,11 @@ mkdir -p "bin"
 make all
 ./bin/executable
 
-cd "../"
+#cd "../Launcher"
+#source pyinstaller-env/bin/activate
+#pyinstaller --hidden-import=tkinter --onefile src/launcher.py
+
+#./dist/launcher
 
 
 
