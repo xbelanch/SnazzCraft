@@ -7,8 +7,6 @@ Root.geometry("300x200")
 
 subprocess.run(["./bin/executable"], cwd="../../SnazzCraft", check=True)
 
-#Root.mainloop()
-
 
 
 
