@@ -11,11 +11,14 @@ SnazzCraft::Entity::Entity(glm::vec3 Position, glm::vec3 Rotation)
 SnazzCraft::Entity::~Entity()
 {
     delete this->EntityMesh;
+    delete this->EntityHitbox;
 }
 
 void SnazzCraft::Entity::Move(const glm::vec3& Rotation, float Distance)
 {
     this->Position += glm::vec3(Distance, Distance, Distance) * SnazzCraft::CalculateFrontVector(this->Rotation + Rotation);
+
+    if (this->EntityHitbox != nullptr) this->EntityHitbox->UpdatePosition(this->Position);
 }
 
 void SnazzCraft::Entity::Rotate(const glm::vec3& Rotation)
@@ -27,4 +30,6 @@ void SnazzCraft::Entity::Rotate(const glm::vec3& Rotation)
     }
 
     this->Front = SnazzCraft::CalculateFrontVector(this->Rotation);
+
+    if (this->EntityHitbox != nullptr) this->EntityHitbox->UpdateRotation(this->Rotation);
 }

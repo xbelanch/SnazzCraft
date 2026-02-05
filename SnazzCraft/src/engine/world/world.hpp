@@ -14,6 +14,7 @@
 #include "../height-map/height-map.hpp"
 #include "../utilities/math/math.hpp"
 #include "../utilities/file-handling/text-file-handling/text-file-handling.hpp"
+#include "../hitbox/hitbox.hpp"
 
 #define WORLD_SAVE_FILE_DESCRIPTOR_NAME            ('0')
 #define WORLD_SAVE_FILE_DESCRIPTOR_SIZE            ('1')
@@ -47,6 +48,8 @@ namespace SnazzCraft
         void RenderChunks();
 
         void OptimizeChunks();
+
+        bool IsCollidingVoxel(const SnazzCraft::Hitbox& Hitbox);
 
     private:
 

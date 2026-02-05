@@ -61,6 +61,29 @@ void SnazzCraft::World::OptimizeChunks()
     }
 }
 
+bool SnazzCraft::World::IsCollidingVoxel(const SnazzCraft::Hitbox& Hitbox)
+{
+    glm::vec3 HitboxMin = Hitbox.Position - Hitbox.HalfDimensions;
+    glm::vec3 HitboxMax = Hitbox.Position + Hitbox.HalfDimensions;
+
+    if (HitboxMax.x < 0.0f || HitboxMax.y < 0.0f || HitboxMax.z < 0.0f)                                             return false;
+    if (HitboxMin.x > SnazzCraft::Chunk::Width * this->Size || HitboxMin.z > SnazzCraft::Chunk::Depth * this->Size) return false;
+
+    int ChunkX = static_cast<int>(Hitbox.Position.x / SnazzCraft::Chunk::Width);
+    int ChunkZ = static_cast<int>(Hitbox.Position.z / SnazzCraft::Chunk::Depth);
+
+    for (int X = ChunkX - 1; X <= ChunkX + 1; X++) {
+    for (int Z = ChunkZ - 1; Z <= ChunkZ + 1; Z++) {
+        auto ChunkIterator = this->Chunks->find(INDEX_2D(X, Z, this->Size));
+        if (ChunkIterator == this->Chunks->end()) continue;
+
+        if (ChunkIterator->second->IsCollidingVoxel(Hitbox)) return true;
+    }
+    }
+
+    return false;
+}
+
 SnazzCraft::World* SnazzCraft::CreateWorld(std::string Name, unsigned int Size, int Seed)
 {
     SnazzCraft::World* NewWorld = new SnazzCraft::World(Name, Size, Seed);
@@ -77,7 +100,7 @@ SnazzCraft::World* SnazzCraft::CreateWorld(std::string Name, unsigned int Size, 
 SnazzCraft::World* SnazzCraft::LoadWorldFromSaveFile(std::string FilePath)
 {
     std::ifstream File(FilePath);
-    if (!File.is_open()) { return nullptr; }
+    if (!File.is_open()) return nullptr;
 
     std::vector<SnazzCraft::Chunk*> NewWorldChunks;
     std::string NewWorldName;

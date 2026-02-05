@@ -10,6 +10,8 @@ SnazzCraft::User::User(glm::vec3 Position, glm::vec3 Rotation) : SnazzCraft::Ent
 void SnazzCraft::User::Move(const glm::vec3& Rotation, float Distance) 
 {
     this->Position += glm::vec3(Distance, 0.0f, Distance) * SnazzCraft::CalculateFrontVector(this->Rotation + Rotation);
+
+    if (this->EntityHitbox != nullptr) this->EntityHitbox->UpdatePosition(this->Position);
 }
 
 void SnazzCraft::User::Rotate(const glm::vec3& Rotation) 
@@ -27,4 +29,6 @@ void SnazzCraft::User::Rotate(const glm::vec3& Rotation)
     this->Rotation[2] = this->Rotation[2] < -89.99f ? -89.99f : this->Rotation[2];
     
     this->Front = SnazzCraft::CalculateFrontVector(this->Rotation);
+
+    if (this->EntityHitbox != nullptr) this->EntityHitbox->UpdateRotation(this->Rotation);
 }

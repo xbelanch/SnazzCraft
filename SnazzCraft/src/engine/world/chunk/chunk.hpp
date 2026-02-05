@@ -12,6 +12,7 @@
 #include "../../texture/atlas/atlas.hpp"
 #include "../../height-map/height-map.hpp"
 #include "../../utilities/math/math.hpp"
+#include "../../hitbox/hitbox.hpp"
 
 namespace SnazzCraft
 {
@@ -44,6 +45,8 @@ namespace SnazzCraft
         void CullVoxelFaces(); // Clears previously optimized voxels and repopulates it
 
         bool VoxelTouchingChunkBorder(unsigned int VoxelIndex, unsigned int* BorderDirection);
+
+        bool IsCollidingVoxel(const SnazzCraft::Hitbox& Hitbox);
 
     private:
 

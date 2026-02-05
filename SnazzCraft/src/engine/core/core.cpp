@@ -64,6 +64,8 @@ void MainMenuCallback(SnazzCraft::Event* Event);
 
 void WorldInputCallback(SnazzCraft::Event* Event);
 
+void RenderWorld();
+
 bool SnazzCraft::Initiate()
 {
     glfwInit();
@@ -124,8 +126,6 @@ bool SnazzCraft::Initiate()
     SnazzCraft::WorldGUI = new SnazzCraft::InWorldGUI(900, 900, SnazzCraft::Window);
     SnazzCraft::WorldGUI->GUIInputHandler->Callback = &WorldInputCallback;
 
-    SnazzCraft::TestHitbox = new SnazzCraft::Hitbox(glm::vec3(10.0f, 60.0f, 10.0f), glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-
     return true;
 }
 
@@ -157,11 +157,10 @@ void SnazzCraft::MainLoop()
 
                 SnazzCraft::ViewMatrix = glm::lookAt(SnazzCraft::Player->Position, SnazzCraft::Player->Position + SnazzCraft::Player->Front, glm::vec3(0.0, 1.0, 0.0));
                 glUniformMatrix4fv(SnazzCraft::ViewLock, 1, GL_FALSE, glm::value_ptr(SnazzCraft::ViewMatrix));
-
                 
-                SnazzCraft::RenderWorld();
+                RenderWorld();
 
-                SnazzCraft::TestHitbox->Draw();
+                SnazzCraft::TestHitbox->Draw(true);
 
                 break;
 
@@ -201,7 +200,7 @@ void SnazzCraft::FreeResources()
     glfwTerminate();
 }
 
-void SnazzCraft::RenderWorld()
+void RenderWorld()
 {
     if (!SnazzCraft::VoxelTextureAtlas->BindTexture()) return;
 
@@ -218,7 +217,7 @@ void SnazzCraft::RenderWorld()
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
 
-    glUniformMatrix4fv(SnazzCraft::ModelLock, 1, GL_FALSE, glm::value_ptr(ModelMatrix));
+    glUniformMatrix4fv(SnazzCraft::ModelLock, 1, GL_FALSE, glm::value_ptr(SnazzCraft::ModelMatrix));
     SnazzCraft::ModelMatrix = glm::mat4(1.0f); // Chunk vertices are stored in world space so no transformation is needed
 
     SnazzCraft::CurrentWorld->RenderChunks();

@@ -57,8 +57,6 @@ namespace SnazzCraft
     void MainLoop();
 
     void FreeResources();
-
-    void RenderWorld();
 }
 
 inline void FrameBufferSizeCallBack(GLFWwindow* Window, int Width, int Height)

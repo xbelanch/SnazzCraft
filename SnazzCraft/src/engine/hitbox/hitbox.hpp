@@ -7,6 +7,7 @@
 #include "../utilities/math/math.hpp"
 #include "../mesh/mesh.hpp"
 #include "../texture/solid-colors/solid-colors.hpp"
+#include "../world/voxel/voxel.hpp"
 
 const std::vector<unsigned int> HitboxIndices = {
     0, 1, 2, 2, 1, 3,
@@ -35,11 +36,25 @@ namespace SnazzCraft
 
         ~Hitbox();
 
-        bool IsColliding(const Hitbox& CollideHitbox, bool YawOnly);
-
         void SetMesh();
 
-        inline bool IsColliding(const glm::vec3& Point)
+        bool IsColliding(const Hitbox& CollideHitbox, bool YawOnly); const
+
+        inline bool IsCollidingVoxel(const glm::vec3& VoxelWorldSpacePosition) const
+        {
+            glm::vec3 Delta = VoxelWorldSpacePosition - this->Position;
+
+            for (unsigned int I = 0; I < 3; I++) {
+                float DA = glm::dot(Delta, this->Axies[I]);
+                float RA = this->HalfDimensions[I];
+
+                if (glm::abs(DA) > (RA + 1.0f)) return false; // Voxel half dimension is always 1
+            }
+
+            return true;
+        }
+
+        inline bool IsColliding(const glm::vec3& Point) const
         {
             glm::vec3 Delta = Point - this->Position;
 
@@ -90,14 +105,19 @@ namespace SnazzCraft
             this->Position = NewPosition;
         }
 
-        inline void Draw()
+        inline void Draw(bool OverrideCullFace)
         {
             if (this->HitboxMesh == nullptr || this->HitboxTexture == nullptr) return;
 
             glEnable(GL_DEPTH_TEST);
-            glCullFace(GL_FRONT); 
-            glFrontFace(GL_CW);  
-            glEnable(GL_CULL_FACE);
+
+            if (!OverrideCullFace) {
+                glCullFace(GL_FRONT); 
+                glFrontFace(GL_CW);  
+                glEnable(GL_CULL_FACE);
+            } else {
+                glDisable(GL_CULL_FACE);
+            }
 
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             this->HitboxTexture->BindTexture();

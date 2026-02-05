@@ -4,6 +4,7 @@
 
 #include "../mesh/mesh.hpp"
 #include "../utilities/math/math.hpp"
+#include "../hitbox/hitbox.hpp"
 
 namespace SnazzCraft
 {
@@ -15,6 +16,7 @@ namespace SnazzCraft
         glm::vec3 Front;
 
         SnazzCraft::Mesh* EntityMesh = nullptr;
+        SnazzCraft::Hitbox* EntityHitbox = nullptr;
 
         Entity(glm::vec3 Position, glm::vec3 Rotation);
         virtual ~Entity();
@@ -24,8 +26,9 @@ namespace SnazzCraft
         virtual void Rotate(const glm::vec3& Rotation);
 
     private:
+        
 
-
+        
     };
 
     
