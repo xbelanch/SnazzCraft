@@ -42,13 +42,15 @@ namespace SnazzCraft
 
         inline bool IsCollidingVoxel(const glm::vec3& VoxelWorldSpacePosition) const
         {
+            const float RB = SnazzCraft::Voxel::Size * 0.5f;
+
             glm::vec3 Delta = VoxelWorldSpacePosition - this->Position;
 
             for (unsigned int I = 0; I < 3; I++) {
                 float DA = glm::dot(Delta, this->Axies[I]);
                 float RA = this->HalfDimensions[I];
 
-                if (glm::abs(DA) > (RA + 1.0f)) return false; // Voxel half dimension is always 1
+                if (glm::abs(DA) > (RA + RB)) return false; // Voxel half dimension is always 1
             }
 
             return true;
@@ -72,7 +74,7 @@ namespace SnazzCraft
         {
             this->Rotation = NewRotation;
             
-            this->Axies[0] = SnazzCraft::CalculateFrontVector(this->Rotation);
+            this->Axies[0] = SnazzCraft::CalculateFrontVector(this->Rotation, true);
             this->Axies[1] = glm::normalize(glm::cross(this->Axies[0], WorldUp));
             this->Axies[2] = glm::normalize(glm::cross(this->Axies[0], this->Axies[1]));
 
@@ -124,7 +126,7 @@ namespace SnazzCraft
             this->HitboxMesh->Draw();
         }
 
-        inline void UpdateColor(const std::string& NewColor)
+        inline void SetColor(const std::string& NewColor)
         {
             this->HitboxColor = NewColor;
 
@@ -141,6 +143,4 @@ namespace SnazzCraft
         std::vector<SnazzCraft::Vertice3D>* HitboxVertices = new std::vector<SnazzCraft::Vertice3D>();
         SnazzCraft::Texture* HitboxTexture = nullptr;
     };
-
-    extern SnazzCraft::Hitbox* TestHitbox;
 }

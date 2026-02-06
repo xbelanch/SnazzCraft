@@ -132,13 +132,11 @@ bool SnazzCraft::Chunk::VoxelTouchingChunkBorder(unsigned int VoxelIndex, unsign
 bool SnazzCraft::Chunk::IsCollidingVoxel(const SnazzCraft::Hitbox& Hitbox)
 {
     for (const auto& VoxelPair : *this->OptimizedVoxels) {
-        glm::vec3 VoxelWorldSpacePosition = glm::vec3(
-            (float)VoxelPair.second.Position[0] * (float)SnazzCraft::Voxel::Size,
-            (float)VoxelPair.second.Position[1] * (float)SnazzCraft::Voxel::Size,
-            (float)VoxelPair.second.Position[2] * (float)SnazzCraft::Voxel::Size
-        ) + this->ChunkWorldOffset + glm::vec3(0.5f * SnazzCraft::Voxel::Size); // Center of voxel
-        
-        if (Hitbox.IsCollidingVoxel(VoxelWorldSpacePosition)) return true;
+        glm::vec3 VoxelPosition = this->ChunkWorldOffset + glm::vec3(VoxelPair.second.Position[0], VoxelPair.second.Position[1], VoxelPair.second.Position[2]) * float(SnazzCraft::Voxel::Size) * glm::vec3(SnazzCraft::Chunk::Width, SnazzCraft::Chunk::Height, SnazzCraft::Chunk::Depth);
+
+        //glm::vec3 voxelCenter = voxelMin + glm::vec3(SnazzCraft::Voxel::Size * 0.5f);
+
+        if (Hitbox.IsCollidingVoxel(VoxelPosition)) return true;
     }
 
     return false;

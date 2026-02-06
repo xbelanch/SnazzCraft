@@ -7,7 +7,7 @@
 
 namespace SnazzCraft
 {
-    glm::vec3 CalculateFrontVector(const glm::vec3& Rotation);
+    glm::vec3 CalculateFrontVector(const glm::vec3& Rotation, bool Normalize);
 }   
 
 

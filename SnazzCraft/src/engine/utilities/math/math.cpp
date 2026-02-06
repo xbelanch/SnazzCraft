@@ -1,6 +1,6 @@
 #include "math.hpp"
 
-glm::vec3 SnazzCraft::CalculateFrontVector(const glm::vec3& Rotation)
+glm::vec3 SnazzCraft::CalculateFrontVector(const glm::vec3& Rotation, bool Normalize)
 {
     float RadYaw   = glm::radians(Rotation.y);
     float RadPitch = glm::radians(Rotation.z);
@@ -14,7 +14,8 @@ glm::vec3 SnazzCraft::CalculateFrontVector(const glm::vec3& Rotation)
     Front.x = CosYaw * CosPitch;
     Front.y = SinPitch;
     Front.z = SinYaw * CosPitch;
-    Front   = glm::normalize(Front);
 
+    if (Normalize) Front   = glm::normalize(Front);
+    
     return Front;
 }

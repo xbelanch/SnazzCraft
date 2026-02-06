@@ -126,12 +126,13 @@ bool SnazzCraft::Initiate()
     SnazzCraft::WorldGUI = new SnazzCraft::InWorldGUI(900, 900, SnazzCraft::Window);
     SnazzCraft::WorldGUI->GUIInputHandler->Callback = &WorldInputCallback;
 
+    SnazzCraft::Player->SetHitbox({ 2.0f, 4.0f, 2.0f });
+
     return true;
 }
 
 void SnazzCraft::MainLoop()
 {
-    SnazzCraft::TestHitbox->SetMesh();
     while (!glfwWindowShouldClose(SnazzCraft::Window) && !SnazzCraft::CloseApplication)
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -160,7 +161,16 @@ void SnazzCraft::MainLoop()
                 
                 RenderWorld();
 
-                SnazzCraft::TestHitbox->Draw(true);
+                //SnazzCraft::Player->EntityHitbox->UpdateRotation(SnazzCraft::Player->Rotation);
+                SnazzCraft::Player->EntityHitbox->UpdatePosition(SnazzCraft::Player->Position + glm::vec3(5.0f) * SnazzCraft::Player->Front);
+                
+                if (SnazzCraft::CurrentWorld->IsCollidingVoxel(*SnazzCraft::Player->EntityHitbox)) {
+                    SnazzCraft::Player->EntityHitbox->SetColor(SNAZZCRAFT_COLOR_LIGHT_RED);
+                } else {
+                    SnazzCraft::Player->EntityHitbox->SetColor(SNAZZCRAFT_COLOR_LIGHT_GREEN);
+                }
+
+                SnazzCraft::Player->EntityHitbox->Draw(true);
 
                 break;
 
@@ -194,8 +204,6 @@ void SnazzCraft::FreeResources()
     delete SnazzCraft::WorldGUI;
     delete SnazzCraft::VoxelTextureAtlas;
     delete SnazzCraft::GlobalFPSTracker;
-
-    delete SnazzCraft::TestHitbox;
     
     glfwTerminate();
 }
@@ -239,19 +247,19 @@ void WorldInputCallback(SnazzCraft::Event* Event)
                     break;
 
                 case SNAZZCRAFT_KEY_W:
-                    SnazzCraft::Player->Move({ 0.0f, 0.0f, 0.0f }, 1.0f);
+                    SnazzCraft::Player->Move({ 0.0f, 0.0f, 0.0f }, 1.0f, false);
                     break;
 
                 case SNAZZCRAFT_KEY_A:
-                    SnazzCraft::Player->Move({ 0.0f, -90.0f, 0.0f }, 1.0f);
+                    SnazzCraft::Player->Move({ 0.0f, -90.0f, 0.0f }, 1.0f, false);
                     break;
 
                 case SNAZZCRAFT_KEY_S:
-                    SnazzCraft::Player->Move({ 0.0f, 180.0f, 0.0f }, 1.0f);
+                    SnazzCraft::Player->Move({ 0.0f, 180.0f, 0.0f }, 1.0f, false);
                     break;
 
                 case SNAZZCRAFT_KEY_D:
-                    SnazzCraft::Player->Move({ 0.0f, 90.0f, 0.0f }, 1.0f);
+                    SnazzCraft::Player->Move({ 0.0f, 90.0f, 0.0f }, 1.0f, false);
                     break;
 
                 case SNAZZCRAFT_KEY_SPACE:
@@ -263,19 +271,19 @@ void WorldInputCallback(SnazzCraft::Event* Event)
                     break;
 
                 case SNAZZCRAFT_KEY_Q:
-                    SnazzCraft::Player->Rotate({ 0.0f, -2.0f, 0.0f });
+                    SnazzCraft::Player->Rotate({ 0.0f, -2.0f, 0.0f }, false);
                     break;
 
                 case SNAZZCRAFT_KEY_E:
-                    SnazzCraft::Player->Rotate({ 0.0f, 2.0f, 0.0f });
+                    SnazzCraft::Player->Rotate({ 0.0f, 2.0f, 0.0f }, false);
                     break;
 
                 case SNAZZCRAFT_KEY_X:
-                    SnazzCraft::Player->Rotate({ 0.0f, 0.0f, -2.0f });
+                    SnazzCraft::Player->Rotate({ 0.0f, 0.0f, -2.0f }, false);
                     break;
 
                 case SNAZZCRAFT_KEY_C:
-                    SnazzCraft::Player->Rotate({ 0.0f, 0.0f, 2.0f });
+                    SnazzCraft::Player->Rotate({ 0.0f, 0.0f, 2.0f }, false);
                     break;
             }
 

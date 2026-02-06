@@ -74,6 +74,8 @@ bool SnazzCraft::World::IsCollidingVoxel(const SnazzCraft::Hitbox& Hitbox)
 
     for (int X = ChunkX - 1; X <= ChunkX + 1; X++) {
     for (int Z = ChunkZ - 1; Z <= ChunkZ + 1; Z++) {
+        if (X < 0 || Z < 0 || X >= static_cast<int>(this->Size) || Z >= static_cast<int>(this->Size)) continue;
+
         auto ChunkIterator = this->Chunks->find(INDEX_2D(X, Z, this->Size));
         if (ChunkIterator == this->Chunks->end()) continue;
 

@@ -1,7 +1,5 @@
 #include "hitbox.hpp"
 
-SnazzCraft::Hitbox* SnazzCraft::TestHitbox = nullptr;
-
 SnazzCraft::Hitbox::Hitbox(glm::vec3 Position, glm::vec3 Dimensions)
 {
     this->Position = Position;
@@ -9,7 +7,7 @@ SnazzCraft::Hitbox::Hitbox(glm::vec3 Position, glm::vec3 Dimensions)
     this->UpdateRotation(this->Rotation);
     this->UpdatePosition(this->Position);
 
-    this->UpdateColor(this->HitboxColor);
+    this->SetColor(this->HitboxColor);
 }
 
 SnazzCraft::Hitbox::Hitbox(glm::vec3 Position, glm::vec3 Dimensions, glm::vec3 Rotation)
@@ -19,7 +17,7 @@ SnazzCraft::Hitbox::Hitbox(glm::vec3 Position, glm::vec3 Dimensions, glm::vec3 R
     this->UpdateRotation(Rotation);
     this->UpdatePosition(this->Position);
 
-    this->UpdateColor(this->HitboxColor);
+    this->SetColor(this->HitboxColor);
 }
 
 SnazzCraft::Hitbox::~Hitbox()
