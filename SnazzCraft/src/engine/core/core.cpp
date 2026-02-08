@@ -146,7 +146,7 @@ void SnazzCraft::MainLoop()
             case SNAZZCRAFT_USER_MODE_WORLD:
                 if (SnazzCraft::CurrentWorld == nullptr || SnazzCraft::WorldGUI == nullptr) break;
 
-                //SnazzCraft::CurrentWorld->ApplyGravityToEntity(SnazzCraft::Player);
+                SnazzCraft::CurrentWorld->ApplyGravityToEntities({ SnazzCraft::Player });
 
                 // Poll and handle events
                 SnazzCraft::WorldGUI->GUIInputHandler->PollEvents();
@@ -277,6 +277,10 @@ void WorldInputCallback(SnazzCraft::Event* Event)
 
                 case SNAZZCRAFT_KEY_C:
                     SnazzCraft::Player->Rotate({ 0.0f, 0.0f, 2.0f });
+                    break;
+
+                case SNAZZCRAFT_KEY_F:
+                    SnazzCraft::Player->Position.y += 0.2f;
                     break;
             }
 

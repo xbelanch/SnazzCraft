@@ -51,7 +51,7 @@
 
 #define SNAZZCRAFT_KEY_CHECK_AMOUNT (0x29)
 
-const unsigned short SNAZZCRAFT_KEY_TO_GLFW_KEY[SNAZZCRAFT_KEY_CHECK_AMOUNT] = {
+const unsigned short SnazzCraftKeyToGLFWKey[SNAZZCRAFT_KEY_CHECK_AMOUNT] = {
     GLFW_KEY_A,
     GLFW_KEY_B,
     GLFW_KEY_C,

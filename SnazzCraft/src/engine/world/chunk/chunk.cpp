@@ -134,10 +134,22 @@ bool SnazzCraft::Chunk::VoxelTouchingChunkBorder(unsigned int VoxelIndex, unsign
 
 SnazzCraft::Voxel* SnazzCraft::Chunk::IsCollidingVoxel(const SnazzCraft::Hitbox* Hitbox)
 {
-    for (auto& VoxelPair : *this->OptimizedVoxels) {
-        this->VoxelCollisionHitbox->Position = glm::vec3((float)VoxelPair.second.Position[0], (float)VoxelPair.second.Position[1], (float)VoxelPair.second.Position[2]) * glm::vec3((float)SnazzCraft::Voxel::Size, (float)SnazzCraft::Voxel::Size, (float)SnazzCraft::Voxel::Size) + this->ChunkWorldOffset + (glm::vec3((float)SnazzCraft::Voxel::Size, (float)SnazzCraft::Voxel::Size, (float)SnazzCraft::Voxel::Size) / 2.0f);
+    int VPosition[3];
+    this->WorldSpaceToVoxelSpace(Hitbox->Position, VPosition);
+
+    for (int X = VPosition[0] - 1; X <= VPosition[0] + 1; X++) {
+    for (int Y = VPosition[1] - 1; Y <= VPosition[1] + 1; Y++) {
+    for (int Z = VPosition[2] - 1; Z <= VPosition[2] + 1; Z++) {
+        if (!VALID_VOXEL_POSITION(X, Y, Z)) continue;
+
+        auto VoxelIterator = this->Voxels->find(VOXEL_INDEX(X, Y, Z));
+        if (VoxelIterator == this->Voxels->end()) continue;
+
+        this->VoxelCollisionHitbox->Position = this->VoxelPositionToWorldPosition(X, Y, Z) + (glm::vec3((float)SnazzCraft::Voxel::Size, (float)SnazzCraft::Voxel::Size, (float)SnazzCraft::Voxel::Size) / 2.0f); 
         
-        if (this->VoxelCollisionHitbox->IsColliding(*Hitbox)) return &VoxelPair.second;
+        if (this->VoxelCollisionHitbox->IsColliding(*Hitbox)) return &VoxelIterator->second;
+    }
+    }
     }
 
     return nullptr;

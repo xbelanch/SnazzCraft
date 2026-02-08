@@ -52,19 +52,26 @@ namespace SnazzCraft
 
         SnazzCraft::Voxel* IsCollidingVoxel(const SnazzCraft::Hitbox* Hitbox); // Returns nullptr if no collision
 
-        bool MoveEntity(SnazzCraft::Entity* Entity, const glm::vec3& Rotation, float Distance); // Returns true if movement occurred without voxel collision
+        void MoveEntity(SnazzCraft::Entity* Entity, const glm::vec3& Rotation, float Distance); // Returns true if movement occurred without voxel collision
 
-        bool MoveEntity(glm::vec3 Translation, SnazzCraft::Entity* Entity, const glm::vec3& Rotation); // Returns true if movement occurred without voxel collision
+        void MoveEntity(glm::vec3 Translation, SnazzCraft::Entity* Entity, const glm::vec3& Rotation); // Returns true if movement occurred without voxel collision
 
-        inline void ApplyGravityToEntity(SnazzCraft::Entity* Entity)
+        inline void ApplyGravityToEntities(std::vector<SnazzCraft::Entity*> AdditionalEntities)
         {
             const float MoveDistance = 0.2f;
 
-            this->MoveEntity(glm::vec3(0.0f, -0.2f, 0.0f), Entity, glm::vec3(0.0f, 0.0f, -90.0f));
+            for (auto& ChunkPair : *this->Chunks) {
+                for (SnazzCraft::Entity* Entity : ChunkPair.second->Entities) {
+                    this->MoveEntity(glm::vec3(0.0f, -MoveDistance, 0.0f), Entity, glm::vec3(0.0f, 0.0f, -90.0f));
+                }
+            }
+
+            for (SnazzCraft::Entity* Entity : AdditionalEntities) {
+                this->MoveEntity(glm::vec3(0.0f, -MoveDistance, 0.0f), Entity, glm::vec3(0.0f, 0.0f, -90.0f));
+            }
         }
 
     private:
-        SnazzCraft::Voxel* ResetPositionIfCollidingVoxel(const glm::vec3& PreviousPosition, SnazzCraft::Entity* Entity);
 
     };
 

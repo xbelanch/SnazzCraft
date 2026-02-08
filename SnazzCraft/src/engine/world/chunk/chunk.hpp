@@ -13,6 +13,7 @@
 #include "../../height-map/height-map.hpp"
 #include "../../utilities/math/math.hpp"
 #include "../../hitbox/hitbox.hpp"
+#include "../../entity/entity.hpp"
 
 namespace SnazzCraft
 {
@@ -33,6 +34,7 @@ namespace SnazzCraft
 
         std::unordered_map<unsigned int, SnazzCraft::Voxel>* Voxels          = new std::unordered_map<unsigned int, SnazzCraft::Voxel>();
         std::unordered_map<unsigned int, SnazzCraft::Voxel>* OptimizedVoxels = new std::unordered_map<unsigned int, SnazzCraft::Voxel>();
+        std::vector<SnazzCraft::Entity*> Entities;
 
         Chunk(int X, int Y); // Chunk Coordinates 
 
@@ -49,6 +51,20 @@ namespace SnazzCraft
         SnazzCraft::Voxel* IsCollidingVoxel(const SnazzCraft::Hitbox* Hitbox); // Returns nullptr if no collision
 
     private:
+        inline glm::vec3 VoxelPositionToWorldPosition(unsigned int X, unsigned int Y, unsigned int Z) const
+        {
+            return glm::vec3((float)X, (float)Y, (float)Z) * glm::vec3((float)SnazzCraft::Voxel::Size, (float)SnazzCraft::Voxel::Size, (float)SnazzCraft::Voxel::Size) + this->ChunkWorldOffset;
+        }
+
+        inline void WorldSpaceToVoxelSpace(const glm::vec3& WorldPosition, int VoxelPosition[3]) 
+        {
+            glm::vec3 LocalPosition = WorldPosition - this->ChunkWorldOffset;
+
+            VoxelPosition[0] = static_cast<int>(LocalPosition.x / SnazzCraft::Voxel::Size);
+            VoxelPosition[1] = static_cast<int>(LocalPosition.y / SnazzCraft::Voxel::Size);
+            VoxelPosition[2] = static_cast<int>(LocalPosition.z / SnazzCraft::Voxel::Size);
+        }
+
         SnazzCraft::Hitbox* VoxelCollisionHitbox = nullptr;
 
     };

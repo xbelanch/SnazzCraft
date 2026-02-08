@@ -15,7 +15,7 @@ SnazzCraft::InputHandler::~InputHandler()
 void SnazzCraft::InputHandler::PollEvents()
 {
     for (unsigned char I = 0; I < SNAZZCRAFT_KEY_CHECK_AMOUNT; I++) { // I is SnazzCraft key
-        if (glfwGetKey(this->Window, SNAZZCRAFT_KEY_TO_GLFW_KEY[I]) == GLFW_PRESS) {
+        if (glfwGetKey(this->Window, SnazzCraftKeyToGLFWKey[I]) == GLFW_PRESS) {
             SnazzCraft::Event* NewEvent = new SnazzCraft::Event(SNAZZCRAFT_EVENT_KEY_DOWN);
 
             NewEvent->EventData->Items.push_back(static_cast<void*>(new unsigned char(I)));

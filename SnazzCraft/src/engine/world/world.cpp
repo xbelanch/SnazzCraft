@@ -1,6 +1,5 @@
 #include "world.hpp"
 
-//SnazzCraft::World* SnazzCraft::CurrentWorld = new SnazzCraft::World("TEST WORLD", 10, 1338); 
 SnazzCraft::World* SnazzCraft::CurrentWorld = nullptr;
 
 SnazzCraft::World::World(std::string Name, unsigned int Size, int Seed)
@@ -76,8 +75,8 @@ SnazzCraft::World* SnazzCraft::CreateWorld(std::string Name, unsigned int Size, 
 
 SnazzCraft::Voxel* SnazzCraft::World::IsCollidingVoxel(const SnazzCraft::Hitbox* Hitbox)
 {
-    int ChunkX = static_cast<int>(Hitbox->Position.x) / (SnazzCraft::Chunk::Width * SnazzCraft::Voxel::Size);
-    int ChunkZ = static_cast<int>(Hitbox->Position.z) / (SnazzCraft::Chunk::Depth * SnazzCraft::Voxel::Size);
+    int ChunkX = static_cast<int>(Hitbox->Position.x / (SnazzCraft::Chunk::Width * SnazzCraft::Voxel::Size));
+    int ChunkZ = static_cast<int>(Hitbox->Position.z / (SnazzCraft::Chunk::Depth * SnazzCraft::Voxel::Size));
 
     for (int X = ChunkX - 1; X <= ChunkX + 1; X++) {
     for (int Z = ChunkZ - 1; Z <= ChunkZ + 1; Z++) {
@@ -94,39 +93,36 @@ SnazzCraft::Voxel* SnazzCraft::World::IsCollidingVoxel(const SnazzCraft::Hitbox*
     return nullptr;
 }
 
-bool SnazzCraft::World::MoveEntity(SnazzCraft::Entity* Entity, const glm::vec3& Rotation, float Distance)
+void SnazzCraft::World::MoveEntity(SnazzCraft::Entity* Entity, const glm::vec3& Rotation, float Distance)
 {
     glm::vec3 PreviousPosition = Entity->Position;
+    
     Entity->Move(Rotation, Distance);
-
-    this->ResetPositionIfCollidingVoxel(PreviousPosition, Entity);
     Entity->EntityHitbox->Position = Entity->Position;
 
-    return true;
-}
+    for (unsigned int I = 0; I < 3; I++) {
+        SnazzCraft::Voxel* CollisionVoxel = this->IsCollidingVoxel(Entity->EntityHitbox);
+        if (CollisionVoxel == nullptr) continue;
 
-bool SnazzCraft::World::MoveEntity(glm::vec3 Translation, SnazzCraft::Entity* Entity, const glm::vec3& Rotation)
-{
-    glm::vec3 PreviousPosition = Entity->Position;
-    Entity->Position += Translation;
-
-    this->ResetPositionIfCollidingVoxel(PreviousPosition, Entity); 
-    Entity->EntityHitbox->Position = Entity->Position;
-
-    return true;
-}
-
-SnazzCraft::Voxel* SnazzCraft::World::ResetPositionIfCollidingVoxel(const glm::vec3& PreviousPosition, SnazzCraft::Entity* Entity)
-{
-    SnazzCraft::Voxel* CollisionVoxel = this->IsCollidingVoxel(Entity->EntityHitbox);
-    if (CollisionVoxel != nullptr) {
-        Entity->Position = PreviousPosition;
-        Entity->EntityHitbox->Position = PreviousPosition;
-
-        return CollisionVoxel;
+        Entity->Position[I] = PreviousPosition[I];
+        Entity->EntityHitbox->Position[I] = PreviousPosition[I];
     }
+}
 
-    return nullptr;
+void SnazzCraft::World::MoveEntity(glm::vec3 Translation, SnazzCraft::Entity* Entity, const glm::vec3& Rotation)
+{
+    for (unsigned int I = 0; I < 3; I++) {
+        float OldCoordinate = Entity->Position[I];
+
+        Entity->Position[I] += Translation[I];
+        Entity->EntityHitbox->Position[I] = Entity->Position[I];
+
+        SnazzCraft::Voxel* CollisionVoxel = this->IsCollidingVoxel(Entity->EntityHitbox);
+        if (CollisionVoxel == nullptr) continue;
+
+        Entity->Position[I] = OldCoordinate;
+        Entity->EntityHitbox->Position[I] = OldCoordinate;
+    }
 }
 
 SnazzCraft::World* SnazzCraft::LoadWorldFromSaveFile(std::string FilePath)
