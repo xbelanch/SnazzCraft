@@ -3,6 +3,7 @@ cd "SnazzCraft"
 
 mkdir -p "build"
 mkdir -p "bin"
+mkdir -p "worlds"
 
 make all
 ./bin/executable
