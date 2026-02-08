@@ -70,8 +70,10 @@ void SnazzCraft::Chunk::UpdateMesh()
         for (SnazzCraft::Vertice3D& Vertice3D : Vertices) { 
             Vertice3D.Position += Offset; // Adjusting to world space once now means not having to create a new model matrix for each individual chunk later
 
+            if (NewVerticesCount >= 0 && NewVerticesCount <= 3 || NewVerticesCount >= 8 && NewVerticesCount <= 11) Vertice3D.Brightness = 0.5f; // Darken front and right faces
+
             NewTexturedVertices.push_back(Vertice3D);
-            NewVerticesCount++;
+            NewVerticesCount++; 
         }
         
         for (unsigned int SideIndex = 0; SideIndex < 6; SideIndex++) {

@@ -51,6 +51,10 @@ void SnazzCraft::Mesh::Initiate()
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(SnazzCraft::Vertice3D), (void*)offsetof(SnazzCraft::Vertice3D, SnazzCraft::Vertice3D::TextureCoordinate));
     glEnableVertexAttribArray(1);
 
+    // layout (location = 2) ? float brightness
+    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(SnazzCraft::Vertice3D), (void*)offsetof(SnazzCraft::Vertice3D, SnazzCraft::Vertice3D::Brightness));
+    glEnableVertexAttribArray(2);
+
     // Unbind (optional safety)
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
