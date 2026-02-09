@@ -16,6 +16,7 @@
 #include "../utilities/file-handling/text-file-handling/text-file-handling.hpp"
 #include "../hitbox/hitbox.hpp"
 #include "../entity/entity.hpp"
+#include "../utilities/math/math.hpp"
 
 #define WORLD_SAVE_FILE_DESCRIPTOR_NAME            ('0')
 #define WORLD_SAVE_FILE_DESCRIPTOR_SIZE            ('1')
@@ -54,7 +55,7 @@ namespace SnazzCraft
 
         void MoveEntity(SnazzCraft::Entity* Entity, const glm::vec3& Rotation, float Distance); // Returns true if movement occurred without voxel collision
 
-        void MoveEntity(glm::vec3 Translation, SnazzCraft::Entity* Entity, const glm::vec3& Rotation); // Returns true if movement occurred without voxel collision
+        void MoveEntity(glm::vec3 Translation, SnazzCraft::Entity* Entity); // Returns true if movement occurred without voxel collision
 
         inline void ApplyGravityToEntities(std::vector<SnazzCraft::Entity*> AdditionalEntities)
         {
@@ -62,16 +63,17 @@ namespace SnazzCraft
 
             for (auto& ChunkPair : *this->Chunks) {
                 for (SnazzCraft::Entity* Entity : ChunkPair.second->Entities) {
-                    this->MoveEntity(glm::vec3(0.0f, -MoveDistance, 0.0f), Entity, glm::vec3(0.0f, 0.0f, -90.0f));
+                    this->MoveEntity(glm::vec3(0.0f, -MoveDistance, 0.0f), Entity);
                 }
             }
 
             for (SnazzCraft::Entity* Entity : AdditionalEntities) {
-                this->MoveEntity(glm::vec3(0.0f, -MoveDistance, 0.0f), Entity, glm::vec3(0.0f, 0.0f, -90.0f));
+                this->MoveEntity(glm::vec3(0.0f, -MoveDistance, 0.0f), Entity);
             }
         }
 
     private:
+        
 
     };
 

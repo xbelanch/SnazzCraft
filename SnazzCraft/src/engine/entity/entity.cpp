@@ -16,7 +16,7 @@ SnazzCraft::Entity::~Entity()
 
 void SnazzCraft::Entity::Move(const glm::vec3& AdditionalRotation, float Distance)
 {
-    this->Position += glm::vec3(Distance, Distance, Distance) * SnazzCraft::CalculateFrontVector(this->Rotation + AdditionalRotation, true);
+    MoveVector3D(this->Position, this->Rotation + AdditionalRotation, Distance);
 
     if (this->EntityHitbox != nullptr) this->EntityHitbox->Position = this->Position;
 }

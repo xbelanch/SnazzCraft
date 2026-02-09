@@ -95,21 +95,24 @@ SnazzCraft::Voxel* SnazzCraft::World::IsCollidingVoxel(const SnazzCraft::Hitbox*
 
 void SnazzCraft::World::MoveEntity(SnazzCraft::Entity* Entity, const glm::vec3& Rotation, float Distance)
 {
-    glm::vec3 PreviousPosition = Entity->Position;
-    
-    Entity->Move(Rotation, Distance);
-    Entity->EntityHitbox->Position = Entity->Position;
+    glm::vec3 NewPosition = Entity->Position;
+    MoveVector3D(NewPosition, Entity->Rotation + Rotation, Distance);
 
     for (unsigned int I = 0; I < 3; I++) {
+        float OldCoordinate = Entity->Position[I];
+
+        Entity->Position[I] = NewPosition[I];
+        Entity->EntityHitbox->Position[I] = NewPosition[I];
+
         SnazzCraft::Voxel* CollisionVoxel = this->IsCollidingVoxel(Entity->EntityHitbox);
         if (CollisionVoxel == nullptr) continue;
 
-        Entity->Position[I] = PreviousPosition[I];
-        Entity->EntityHitbox->Position[I] = PreviousPosition[I];
+        Entity->Position[I] = OldCoordinate;
+        Entity->EntityHitbox->Position[I] = OldCoordinate;
     }
 }
 
-void SnazzCraft::World::MoveEntity(glm::vec3 Translation, SnazzCraft::Entity* Entity, const glm::vec3& Rotation)
+void SnazzCraft::World::MoveEntity(glm::vec3 Translation, SnazzCraft::Entity* Entity)
 {
     for (unsigned int I = 0; I < 3; I++) {
         float OldCoordinate = Entity->Position[I];

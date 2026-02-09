@@ -156,6 +156,8 @@ SnazzCraft::Voxel* SnazzCraft::Chunk::IsCollidingVoxel(const SnazzCraft::Hitbox*
         auto VoxelIterator = this->Voxels->find(VOXEL_INDEX(X, Y, Z));
         if (VoxelIterator == this->Voxels->end()) continue;
 
+        if (!VoxelIterator->second.Collidable) continue;
+
         this->VoxelCollisionHitbox->Position = this->VoxelPositionToWorldPosition(X, Y, Z) + (glm::vec3((float)SnazzCraft::Voxel::Size, (float)SnazzCraft::Voxel::Size, (float)SnazzCraft::Voxel::Size) / 2.0f); 
         
         if (this->VoxelCollisionHitbox->IsColliding(*Hitbox)) return &VoxelIterator->second;

@@ -256,11 +256,11 @@ void WorldInputCallback(SnazzCraft::Event* Event)
                     break;
 
                 case SNAZZCRAFT_KEY_SPACE:
-                    SnazzCraft::CurrentWorld->MoveEntity(glm::vec3(0.0f, 1.0f, 0.0f), SnazzCraft::Player, glm::vec3(0.0f));
+                    SnazzCraft::CurrentWorld->MoveEntity(glm::vec3(0.0f, 1.0f, 0.0f), SnazzCraft::Player);
                     break;
 
                 case SNAZZCRAFT_KEY_LEFT_SHIFT:
-                    SnazzCraft::CurrentWorld->MoveEntity(glm::vec3(0.0f, -1.0f, 0.0f), SnazzCraft::Player, glm::vec3(0.0f));
+                    SnazzCraft::CurrentWorld->MoveEntity(glm::vec3(0.0f, -1.0f, 0.0f), SnazzCraft::Player);
                     break;
 
                 case SNAZZCRAFT_KEY_Q:
