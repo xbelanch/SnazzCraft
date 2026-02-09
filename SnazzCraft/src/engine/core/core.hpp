@@ -69,30 +69,43 @@ inline void FrameBufferSizeCallBack(GLFWwindow* Window, int Width, int Height)
 
 inline void MouseButtonCallback(GLFWwindow* Window, int Button, int Action, int Mods)
 {
-    if (Button == GLFW_MOUSE_BUTTON_LEFT && Action == GLFW_PRESS) {
-        double MouseX, MouseY;
-        glfwGetCursorPos(Window, &MouseX, &MouseY);
+    double MouseX, MouseY;
+    glfwGetCursorPos(Window, &MouseX, &MouseY);
 
-        SnazzCraft::Event* NewEvent = new SnazzCraft::Event(SNAZZCRAFT_EVENT_MOUSE_CLICK_LEFT);
-        NewEvent->EventData->Items.push_back(static_cast<void*>(new glm::dvec2(MouseX, MouseY)));
-        NewEvent->EventData->Types.push_back(SNAZZCRAFT_DATA_TYPE_DVEC2);
+    uint8_t EventType;
+    switch (Button)
+    {
+        case GLFW_MOUSE_BUTTON_LEFT:
+            EventType = SNAZZCRAFT_EVENT_MOUSE_CLICK_LEFT;
+            break;
 
-        switch (SnazzCraft::UserMode) {
-            case SNAZZCRAFT_USER_MODE_WORLD:
-                NewEvent->EventData->Items.push_back(static_cast<void*>(SnazzCraft::WorldGUI));
-                NewEvent->EventData->Types.push_back(SNAZZCRAFT_DATA_TYPE_GUI_ADDRESS);
+        case GLFW_MOUSE_BUTTON_RIGHT:
+            EventType = SNAZZCRAFT_EVENT_MOUSE_CLICK_RIGHT;
+            break;
 
-                SnazzCraft::WorldGUI->GUIInputHandler->EventQueue.push_back(NewEvent);
+        default:
+            return;
+    }
 
-                break;
+    SnazzCraft::Event* NewEvent = new SnazzCraft::Event(EventType);
+    NewEvent->EventData->Items.push_back(static_cast<void*>(new glm::dvec2(MouseX, MouseY)));
+    NewEvent->EventData->Types.push_back(SNAZZCRAFT_DATA_TYPE_DVEC2);
 
-            case SNAZZCRAFT_USER_MODE_MAIN_MENU:
-                NewEvent->EventData->Items.push_back(static_cast<void*>(SnazzCraft::MenuGUI));
-                NewEvent->EventData->Types.push_back(SNAZZCRAFT_DATA_TYPE_GUI_ADDRESS);
+    switch (SnazzCraft::UserMode) {
+        case SNAZZCRAFT_USER_MODE_WORLD:
+            NewEvent->EventData->Items.push_back(static_cast<void*>(SnazzCraft::WorldGUI));
+            NewEvent->EventData->Types.push_back(SNAZZCRAFT_DATA_TYPE_GUI_ADDRESS);
 
-                SnazzCraft::MenuGUI->GUIInputHandler->EventQueue.push_back(NewEvent); 
+            SnazzCraft::WorldGUI->GUIInputHandler->EventQueue.push_back(NewEvent);
 
-                break;
-        }
+            break;
+
+        case SNAZZCRAFT_USER_MODE_MAIN_MENU:
+            NewEvent->EventData->Items.push_back(static_cast<void*>(SnazzCraft::MenuGUI));
+            NewEvent->EventData->Types.push_back(SNAZZCRAFT_DATA_TYPE_GUI_ADDRESS);
+
+            SnazzCraft::MenuGUI->GUIInputHandler->EventQueue.push_back(NewEvent); 
+
+            break;
     }
 }

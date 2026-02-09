@@ -6,7 +6,7 @@ mkdir -p "build"
 mkdir -p "bin"
 mkdir -p "worlds"
 
-#make all
+make all
 
 cd "$ScriptDirectory/Launcher"
 
