@@ -2,7 +2,9 @@
 
 void PropogateSunlight(int X, int Y, int Z, SnazzCraft::World* World, unsigned int LightLevel);
 
-bool OutOfBounds(int X, int Y, int Z, unsigned int WorldSize);
+bool InBounds(int X, int Y, int Z, unsigned int WorldSize);
+
+void ApplyToFaces(unsigned int VoxelFaceLightLevels[6], unsigned int NewLightLevel, bool OutEffectedFaces[6]);
 
 void SnazzCraft::World::UpdateLighting()
 {
@@ -43,7 +45,7 @@ void PropogateSunlight(int X, int Y, int Z, SnazzCraft::World* World, unsigned i
         OutZ = Z % SnazzCraft::Chunk::Depth;
     };  
 
-    if (!OutOfBounds(X, Y, Z, World->Size) || LightLevel == 0) return;
+    if (!InBounds(X, Y, Z, World->Size) || LightLevel == 0) return;
 
     int ChunkX, ChunkZ;
     GetChunkPosition(ChunkX, ChunkZ);
@@ -63,15 +65,30 @@ void PropogateSunlight(int X, int Y, int Z, SnazzCraft::World* World, unsigned i
         return;
     }
 
+    bool EffectedFaces[6];
+    ApplyToFaces(VoxelIterator->second.FaceLightLevels, LightLevel, EffectedFaces);
+
     for (unsigned int I = 0; I < 6; I++) {
-        VoxelIterator->second.FaceLightLevels[I] = VoxelIterator->second.FaceLightLevels[I] >= LightLevel ? VoxelIterator->second.FaceLightLevels[I] : LightLevel;
+        if (EffectedFaces[I]) continue;
 
         NewRecursion(I);
     }
 
 }
 
-bool OutOfBounds(int X, int Y, int Z, unsigned int WorldSize)
+bool InBounds(int X, int Y, int Z, unsigned int WorldSize)
 {
     return X >= 0 && Y >= 0 && Z >= 0 && X < SnazzCraft::Chunk::Width * WorldSize && Y < SnazzCraft::Chunk::Height && Z < SnazzCraft::Chunk::Depth * WorldSize;
+}
+
+void ApplyToFaces(unsigned int VoxelFaceLightLevels[6], unsigned int NewLightLevel, bool OutEffectedFaces[6])
+{
+    for (unsigned int I = 0; I < 6; I++) {
+        if (VoxelFaceLightLevels[I] >= NewLightLevel) {
+            OutEffectedFaces[I] = false;
+        } else {
+            VoxelFaceLightLevels[I] = NewLightLevel;
+            OutEffectedFaces[I] = true;
+        }
+    }
 }
