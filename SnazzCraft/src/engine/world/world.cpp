@@ -52,8 +52,6 @@ void SnazzCraft::World::RenderChunks()
 
 void SnazzCraft::World::OptimizeChunks()
 {
-    this->UpdateLighting();
-
     for (auto& ChunkPair : *this->Chunks) {
         ChunkPair.second->CullVoxelFaces();
         ChunkPair.second->UpdateMesh();

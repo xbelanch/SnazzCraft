@@ -7,7 +7,6 @@ layout(location = 2) in float aBrightness;
 out vec2 TexCoord;
 out float Brightness;
   
-uniform mat4 transform;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
