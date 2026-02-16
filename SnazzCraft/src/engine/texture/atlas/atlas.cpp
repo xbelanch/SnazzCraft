@@ -84,19 +84,6 @@ std::vector<SnazzCraft::Vertice3D> SnazzCraft::VoxelTextureApplier::GetTexturedV
         default:
             break;
     }
-
-    if (Voxel.LightProducingLevel > 0) return Vertices;
-
-    for (unsigned int SideIndex = 0; SideIndex < 6; SideIndex++) {
-        if (Voxel.Sides[SideIndex] == 0) continue;
-
-        unsigned int VerticeIndex = SideIndex * 4;
-
-        for (unsigned int I = 0; I < 4; I++) {
-            Vertices[VerticeIndex + I].Brightness = Voxel.FaceLightLevels[SideIndex] / (float)MAX_BRIGHTNESS;
-        }
-    }
-
     return Vertices;
 }
 

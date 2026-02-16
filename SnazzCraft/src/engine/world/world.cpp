@@ -52,7 +52,7 @@ void SnazzCraft::World::RenderChunks()
 
 void SnazzCraft::World::OptimizeChunks()
 {
-    //this->UpdateLighting();
+    this->UpdateLighting();
 
     for (auto& ChunkPair : *this->Chunks) {
         ChunkPair.second->CullVoxelFaces();
@@ -112,6 +112,71 @@ void SnazzCraft::World::MoveEntity(glm::vec3 Translation, SnazzCraft::Entity* En
 
         Entity->Position[I] = OldCoordinate;
         Entity->EntityHitbox->Position[I] = OldCoordinate;
+    }
+}
+
+void SnazzCraft::World::UpdateLighting()
+{
+    for (auto& ChunkPair : *this->Chunks) ChunkPair.second->LightValues->clear();
+
+    for (auto& ChunkPair : *this->Chunks) {
+    for (auto& VoxelPair : *ChunkPair.second->Voxels) {
+        if (VoxelPair.second.LightProducingLevel <= 0) continue;
+
+        int Position[3] = {
+            static_cast<int>(VoxelPair.second.Position[0]) + ChunkPair.second->Position[0] * SnazzCraft::Chunk::Width,
+            static_cast<int>(VoxelPair.second.Position[1]),
+            static_cast<int>(VoxelPair.second.Position[2]) + ChunkPair.second->Position[1] * SnazzCraft::Chunk::Depth,
+        };
+        this->ApplyLighting(Position, VoxelPair.second.LightProducingLevel);
+    }
+    }
+}
+
+void SnazzCraft::World::ApplyLighting(int LightOrigin[3], int LightProducingLevel)
+{
+    auto OutsideWorld = [this](int X, int Y, int Z) -> bool
+    {
+        return X < 0 || Y < 0 || Z < 0 || X >= static_cast<int>(this->Size) * SnazzCraft::Chunk::Width || Y >= SnazzCraft::Chunk::Height || Z >= static_cast<int>(this->Size) * SnazzCraft::Chunk::Depth;
+    };
+
+    auto GetLightValue = [LightOrigin, LightProducingLevel](int X, int Y, int Z) -> int
+    {
+        int TranslationX = glm::abs(LightOrigin[0] - X);
+        int TranslationY = glm::abs(LightOrigin[1] - Y);
+        int TranslationZ = glm::abs(LightOrigin[2] - Z);
+
+        return LightProducingLevel - (TranslationX + TranslationY + TranslationZ);
+    };
+
+    for (int X = LightOrigin[0] - LightProducingLevel; X <= LightOrigin[0] + LightProducingLevel; X++) {
+    for (int Y = LightOrigin[1] - LightProducingLevel; Y <= LightOrigin[1] + LightProducingLevel; Y++) {
+    for (int Z = LightOrigin[2] - LightProducingLevel; Z <= LightOrigin[2] + LightProducingLevel; Z++) {
+        if (OutsideWorld(X, Y, Z)) continue;
+
+        int ChunkX = X / SnazzCraft::Chunk::Width;
+        int ChunkZ = Z / SnazzCraft::Chunk::Depth;
+        auto ChunkIterator = this->Chunks->find(INDEX_2D(ChunkX, ChunkZ, this->Size));
+        if (ChunkIterator == this->Chunks->end()) continue;
+
+        int LocalX = X % SnazzCraft::Chunk::Width;
+        int LocalY = Y % SnazzCraft::Chunk::Height;
+        int LocalZ = Z % SnazzCraft::Chunk::Depth;
+
+        int LightValue = GetLightValue(X, Y, Z);
+        if (LightValue <= 0) continue;
+
+        int LightIndex = INDEX_3D(LocalX, LocalY, LocalZ, SnazzCraft::Chunk::Width, SnazzCraft::Chunk::Height);
+        auto LightIterator = ChunkIterator->second->LightValues->find(LightIndex);
+
+        if (LightIterator == ChunkIterator->second->LightValues->end()) {
+            ChunkIterator->second->LightValues->insert_or_assign(LightIndex, LightValue);
+        } else {
+            if (LightIterator->second >= LightValue) continue;
+            ChunkIterator->second->LightValues->insert_or_assign(LightIndex, LightValue);
+        }
+    }
+    }
     }
 }
 

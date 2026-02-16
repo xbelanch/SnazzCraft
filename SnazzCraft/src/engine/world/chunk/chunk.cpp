@@ -27,6 +27,7 @@ SnazzCraft::Chunk::~Chunk()
 {
     delete this->Voxels;
     delete this->OptimizedVoxels;
+    delete this->LightValues;
 
     delete this->ChunkMesh;
     delete this->VoxelCollisionHitbox;
@@ -54,8 +55,7 @@ void SnazzCraft::Chunk::Generate(SnazzCraft::HeightMap* HeightMap, unsigned int 
         // Testing Torches
         if (X != 5 || Z != 5) continue;
         SnazzCraft::Voxel NewVoxel = SnazzCraft::Voxel(X, HeightAtPositionIterator->second, Z, ID_VOXEL_TORCH, false, false);
-        NewVoxel.LightProducingLevel = 10;
-        for (unsigned int I = 0; I < 6; I++) { NewVoxel.FaceLightLevels[I] = 15; }
+        NewVoxel.LightProducingLevel = 18;
 
         this->Voxels->insert({ VOXEL_INDEX(X, HeightAtPositionIterator->second, Z), NewVoxel });
     }
@@ -74,11 +74,10 @@ void SnazzCraft::Chunk::UpdateMesh()
         unsigned int NewVerticesCount = 0;
 
         std::vector<SnazzCraft::Vertice3D> Vertices = SnazzCraft::EngineVoxelTextureApplier->GetTexturedVertices(VoxelPair.second);
+        this->ApplyBrightnessToVertices(Vertices, VoxelPair.second);
   
         for (SnazzCraft::Vertice3D& Vertice3D : Vertices) { 
             Vertice3D.Position += Offset; // Adjusting to world space once now means not having to create a new model matrix for each individual chunk later
-
-            //if (NewVerticesCount >= 0 && NewVerticesCount <= 3 || NewVerticesCount >= 8 && NewVerticesCount <= 11) Vertice3D.Brightness = 0.5f; // Darken front and right faces
 
             NewTexturedVertices.push_back(Vertice3D);
             NewVerticesCount++; 
@@ -173,5 +172,21 @@ SnazzCraft::Voxel* SnazzCraft::Chunk::IsCollidingVoxel(const SnazzCraft::Hitbox*
     }
 
     return nullptr;
+}
+
+void SnazzCraft::Chunk::ApplyBrightnessToVertices(std::vector<SnazzCraft::Vertice3D>& Vertices, const SnazzCraft::Voxel& Voxel)
+{
+    int LightApplyValue = 1;
+
+    auto LightIterator = this->LightValues->find(INDEX_3D(Voxel.Position[0], Voxel.Position[1], Voxel.Position[2], SnazzCraft::Chunk::Width, SnazzCraft::Chunk::Height));
+    if (LightIterator != this->LightValues->end()) {
+        if (LightIterator->second > LightApplyValue) LightApplyValue = LightIterator->second;
+    }
+
+    if (Voxel.LightProducingLevel > LightApplyValue) LightApplyValue = Voxel.LightProducingLevel;
+
+    for (SnazzCraft::Vertice3D& Vertice : Vertices) {
+        Vertice.Brightness = LightApplyValue / static_cast<float>(MAX_BRIGHTNESS);
+    }
 }
 

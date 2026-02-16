@@ -4,7 +4,7 @@
 
 #include "../../../../includes/glm/glm.hpp"
 
-#define MAX_BRIGHTNESS (15)
+#define MAX_BRIGHTNESS (20)
 
 namespace SnazzCraft
 {
@@ -15,7 +15,7 @@ namespace SnazzCraft
 
         unsigned int Position[3]; // In local chunk space
         unsigned int ID;
-        unsigned int LightProducingLevel = 0;
+        int LightProducingLevel = 0;
         bool Cullable = true;
         bool Collidable = true;
 
@@ -25,7 +25,6 @@ namespace SnazzCraft
             Value of 0 represents that side is not visible    
         */
         unsigned int Sides[6] = { 1, 1, 1, 1, 1, 1 }; 
-        unsigned int FaceLightLevels[6] = { 4, 4, 4, 4, 4, 4 }; 
 
         Voxel(unsigned int X, unsigned int Y, unsigned int Z, unsigned int ID);
 

@@ -18,7 +18,6 @@ all:
 	$(CPPC) $(CPPFLAGS) src/engine/world/world.cpp -o build/world.o
 	$(CPPC) $(CPPFLAGS) src/engine/world/chunk/chunk.cpp -o build/chunk.o
 	$(CPPC) $(CPPFLAGS) src/engine/world/voxel/voxel.cpp -o build/voxel.o
-	$(CPPC) $(CPPFLAGS) src/engine/world/lighting-algarithim/lighting-algarithim.cpp -o build/lighting-algarithim.o
 	$(CPPC) $(CPPFLAGS) src/engine/perlin-noise/noise-module.cpp -o build/perlin-noise.o 
 	$(CPPC) $(CPPFLAGS) src/engine/height-map/height-map.cpp -o build/height-map.o
 	$(CPPC) $(CPPFLAGS) src/engine/utilities/file-handling/text-file-handling/text-file-handling.cpp -o build/text-file-handling.o

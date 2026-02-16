@@ -60,6 +60,8 @@ namespace SnazzCraft
 
         void UpdateLighting();
 
+        void ApplyLighting(int LightOrigin[3], int LightProducingLevel);
+
         inline void ApplyGravityToEntities(std::vector<SnazzCraft::Entity*> AdditionalEntities)
         {
             const float MoveDistance = 0.2f;

@@ -34,6 +34,7 @@ namespace SnazzCraft
 
         std::unordered_map<unsigned int, SnazzCraft::Voxel>* Voxels          = new std::unordered_map<unsigned int, SnazzCraft::Voxel>();
         std::unordered_map<unsigned int, SnazzCraft::Voxel>* OptimizedVoxels = new std::unordered_map<unsigned int, SnazzCraft::Voxel>();
+        std::unordered_map<unsigned int, int>*               LightValues     = new std::unordered_map<unsigned int, int>();
         std::vector<SnazzCraft::Entity*> Entities;
 
         Chunk(int X, int Y); // Chunk Coordinates 
@@ -51,6 +52,8 @@ namespace SnazzCraft
         SnazzCraft::Voxel* IsCollidingVoxel(const SnazzCraft::Hitbox* Hitbox); // Returns nullptr if no collision
 
     private:
+        void ApplyBrightnessToVertices(std::vector<SnazzCraft::Vertice3D>& Vertices, const SnazzCraft::Voxel& Voxel);
+
         inline glm::vec3 VoxelPositionToWorldPosition(unsigned int X, unsigned int Y, unsigned int Z) const
         {
             return glm::vec3((float)X, (float)Y, (float)Z) * glm::vec3((float)SnazzCraft::Voxel::Size, (float)SnazzCraft::Voxel::Size, (float)SnazzCraft::Voxel::Size) + this->ChunkWorldOffset;
