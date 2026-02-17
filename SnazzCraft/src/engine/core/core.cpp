@@ -2,7 +2,7 @@
 
 Shader* SnazzCraft::VoxelShader = nullptr;
 
-glm::mat4 SnazzCraft::ProjectionMatrix = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 1000.0f);
+glm::mat4 SnazzCraft::ProjectionMatrix = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 1000000.0f);
 int SnazzCraft::ProjectionLock;
 
 glm::mat4 SnazzCraft::ModelMatrix = glm::mat4(1.0f);
@@ -76,7 +76,7 @@ bool SnazzCraft::Initiate()
     SnazzCraft::Window = glfwCreateWindow(900, 900, "SnazzCraft", NULL, NULL);
     if (SnazzCraft::Window == NULL)
     {
-        std::cout << "Failed to create GLFW window" << std::endl;
+        std::cout << "Failed to create GLFW window\n";
         glfwTerminate();
 
         return false;
@@ -184,7 +184,7 @@ void SnazzCraft::MainLoop()
 
 void SnazzCraft::FreeResources()
 {
-    SaveWorldToFile(SnazzCraft::CurrentWorld, true); 
+    SnazzCraft::CurrentWorld->SaveWorldToFile(true);
 
     delete SnazzCraft::VoxelShader;
     delete SnazzCraft::VoxelMesh;
@@ -219,7 +219,7 @@ void RenderWorld()
     glUniformMatrix4fv(SnazzCraft::ModelLock, 1, GL_FALSE, glm::value_ptr(SnazzCraft::ModelMatrix));
     SnazzCraft::ModelMatrix = glm::mat4(1.0f); // Chunk vertices are stored in world space so no transformation is needed
 
-    SnazzCraft::CurrentWorld->RenderChunks();
+    SnazzCraft::CurrentWorld->RenderChunks(SnazzCraft::Player);
 }
 
 void WorldInputCallback(SnazzCraft::Event* Event)
@@ -292,7 +292,7 @@ void WorldInputCallback(SnazzCraft::Event* Event)
             SnazzCraft::GUI* WorldGUI = static_cast<SnazzCraft::GUI*>((Event->EventData->AccessDataType(SNAZZCRAFT_DATA_TYPE_GUI_ADDRESS)));
             if (WorldGUI == nullptr) return;
 
-            WorldGUI->HandleLeftMouseClick(Event);
+            WorldGUI->SendEventToButtons(Event);
             
             break;
         }
@@ -308,7 +308,7 @@ void MainMenuCallback(SnazzCraft::Event* Event)
             SnazzCraft::GUI* MenuGUI = static_cast<SnazzCraft::GUI*>((Event->EventData->AccessDataType(SNAZZCRAFT_DATA_TYPE_GUI_ADDRESS)));
             if (MenuGUI == nullptr) return;
            
-            MenuGUI->HandleLeftMouseClick(Event);
+            MenuGUI->SendEventToButtons(Event);
             break;
         }
     }

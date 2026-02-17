@@ -25,3 +25,8 @@ void SnazzCraft::MoveVector3D(glm::vec3& Vector, const glm::vec3& Rotation, floa
     glm::vec3 Front = SnazzCraft::CalculateFrontVector(Rotation, true);
     Vector += Front * Distance;
 }
+
+void SnazzCraft::MoveVector3DWithFront(glm::vec3& Vector, const glm::vec3& Front, float Distance)
+{
+    Vector += Front * Distance;
+}

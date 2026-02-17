@@ -10,6 +10,8 @@ namespace SnazzCraft
     glm::vec3 CalculateFrontVector(const glm::vec3& Rotation, bool Normalize);
 
     void MoveVector3D(glm::vec3& Vector, const glm::vec3& Rotation, float Distance);
+
+    void MoveVector3DWithFront(glm::vec3& Vector, const glm::vec3& Front, float Distance);
 }   
 
 

@@ -17,6 +17,7 @@
 #include "../utilities/file-handling/text-file-handling/text-file-handling.hpp"
 #include "../hitbox/hitbox.hpp"
 #include "../entity/entity.hpp"
+#include "../entity/user/user.hpp"
 #include "../utilities/math/math.hpp"
 
 #define WORLD_SAVE_FILE_DESCRIPTOR_NAME            ('0')
@@ -31,13 +32,22 @@ namespace SnazzCraft
     class World
     {
     public:
+        struct VoxelDDAResult
+        {
+            SnazzCraft::Voxel* CollidingVoxel = nullptr;
+            glm::vec3 EndPosition = glm::vec3(0.0f);
+            bool CollidedWithVoxel = false;
+        };
+
         std::string Name = "UNASSIGNED";
         unsigned int Size; // Size^2 = #Chunks
         int Seed;
+
         double HeightMapScale = 0.005; // Smaller = Smoother Terrain
         double HeightMapHeightMultiplier = 32.0;
-        
         SnazzCraft::HeightMap* WorldHeightMap = nullptr;
+
+        unsigned int RenderDistance = 50;
 
         std::unordered_map<unsigned int, SnazzCraft::Chunk*>* Chunks = new std::unordered_map<unsigned int, SnazzCraft::Chunk*>();
         std::mutex ChunkMutex;
@@ -48,11 +58,13 @@ namespace SnazzCraft
 
         bool GenerateChunk(unsigned int X, unsigned int Z);
 
-        void RenderChunks();
+        void RenderChunks(SnazzCraft::User* Player);
 
         void OptimizeChunks();
 
-        SnazzCraft::Voxel* IsCollidingVoxel(const SnazzCraft::Hitbox* Hitbox); // Returns nullptr if no collision
+        SnazzCraft::Voxel* GetCollidingVoxel(const SnazzCraft::Hitbox* Hitbox); // Returns nullptr if no collision
+
+        SnazzCraft::Voxel* GetCollidingVoxel(const glm::vec3& Position); 
 
         void MoveEntity(SnazzCraft::Entity* Entity, const glm::vec3& Rotation, float Distance); // Returns true if movement occurred without voxel collision
 
@@ -61,6 +73,12 @@ namespace SnazzCraft
         void UpdateLighting();
 
         void ApplyLighting(int LightOrigin[3], int LightProducingLevel);
+
+        bool SaveWorldToFile(bool OverwriteExistingFile);
+
+        bool PlaceBlock(SnazzCraft::User* Player);
+
+        SnazzCraft::World::VoxelDDAResult* MarchDDAToVoxel(const glm::vec3& StartingPosition, const glm::vec3& FrontVector, float MaxDistance); // FrontVector should be normalized
 
         inline void ApplyGravityToEntities(std::vector<SnazzCraft::Entity*> AdditionalEntities)
         {
@@ -78,15 +96,21 @@ namespace SnazzCraft
         }
 
     private:
+
         
+    public:
+        static SnazzCraft::World* CreateWorld(std::string Name, unsigned int Size, int Seed);
+
+        static SnazzCraft::World* LoadWorldFromSaveFile(std::string FilePath);
+
 
     };
 
-    SnazzCraft::World* CreateWorld(std::string Name, unsigned int Size, int Seed);
+    
 
-    SnazzCraft::World* LoadWorldFromSaveFile(std::string FilePath);
+    
 
-    bool SaveWorldToFile(SnazzCraft::World* World, bool OverwriteExistingFile);
+    
 
     extern SnazzCraft::World* CurrentWorld;
 }

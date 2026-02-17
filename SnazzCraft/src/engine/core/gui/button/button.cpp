@@ -42,7 +42,7 @@ void SetWorldModeButtonCallback(SnazzCraft::Event* Event)
     SnazzCraft::World* NewWorld = SnazzCraft::CurrentWorld;
 
     if (NewWorld == nullptr) { 
-        NewWorld = SnazzCraft::CreateWorld("default-generated-world", 4, 58008);
+        NewWorld = SnazzCraft::World::CreateWorld("default-generated-world", 4, 58008);
         NewWorld->UpdateLighting();
         NewWorld->OptimizeChunks();
     }

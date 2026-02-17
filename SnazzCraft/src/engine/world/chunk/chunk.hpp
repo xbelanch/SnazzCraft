@@ -25,7 +25,7 @@ namespace SnazzCraft
         const static int Depth  = 16;
 
         #define VALID_VOXEL_POSITION(X, Y, Z) ((X) >= 0 && (Y) >= 0 && (Z) >= 0 && (X) < SnazzCraft::Chunk::Width && (Y) < SnazzCraft::Chunk::Height && (Z) < SnazzCraft::Chunk::Depth)
-        #define VOXEL_INDEX(X, Y, Z) (INDEX_3D(X, Y, Z, SnazzCraft::Chunk::Width, SnazzCraft::Chunk::Height))
+        #define VOXEL_INDEX(X, Y, Z)          (INDEX_3D(X, Y, Z, SnazzCraft::Chunk::Width, SnazzCraft::Chunk::Height))
 
         int Position[2]; // X & Z Chunk Coordinates
         glm::vec3 ChunkWorldOffset;
@@ -45,11 +45,13 @@ namespace SnazzCraft
 
         void UpdateMesh();
 
-        void CullVoxelFaces(); // Clears previously optimized voxels and repopulates it
+        void CullVoxelFaces(); // Clears previously optimized voxels and repopulates the std::unordered_map
 
         bool VoxelTouchingChunkBorder(unsigned int VoxelIndex, unsigned int* BorderDirection);
 
-        SnazzCraft::Voxel* IsCollidingVoxel(const SnazzCraft::Hitbox* Hitbox); // Returns nullptr if no collision
+        SnazzCraft::Voxel* GetCollidingVoxel(const SnazzCraft::Hitbox* Hitbox); // Returns nullptr if no collision
+
+        SnazzCraft::Voxel* GetCollidingVoxel(const glm::vec3& Position);
 
     private:
         void ApplyBrightnessToVertices(std::vector<SnazzCraft::Vertice3D>& Vertices, const SnazzCraft::Voxel& Voxel);
@@ -69,6 +71,27 @@ namespace SnazzCraft
         }
 
         SnazzCraft::Hitbox* VoxelCollisionHitbox = nullptr;
+
+    
+    public:
+        static inline void GetChunkPosition(const glm::vec3& Position, int OutChunkPosition[2])
+        {
+            OutChunkPosition[0] = static_cast<int>(Position.x) / SnazzCraft::Chunk::Width;
+            OutChunkPosition[1] = static_cast<int>(Position.z) / SnazzCraft::Chunk::Depth;
+        }
+
+        static inline void GetChunkPosition(int X, int Z, int OutChunkPosition[2])
+        {
+            OutChunkPosition[0] = X / SnazzCraft::Chunk::Width;
+            OutChunkPosition[1] = Z / SnazzCraft::Chunk::Depth;
+        }
+
+        static inline void GetLocalVoxelPosition(int X, int Y, int Z, int OutLocalChunkPosition[3])
+        {
+            OutLocalChunkPosition[0] = X % SnazzCraft::Chunk::Width;
+            OutLocalChunkPosition[1] = Y % SnazzCraft::Chunk::Height;
+            OutLocalChunkPosition[2] = Z % SnazzCraft::Chunk::Depth;
+        }
 
     };
 

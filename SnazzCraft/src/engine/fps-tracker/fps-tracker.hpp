@@ -14,6 +14,11 @@ namespace SnazzCraft
 
         void UpdateFPS();
 
+        inline double GetDeltaTime()
+        {
+            return CurrentTime - LastTime;
+        }
+
     private:
         double LastTime = 0.0;
         double CurrentTime = 0.0;

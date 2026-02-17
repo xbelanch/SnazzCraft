@@ -145,12 +145,8 @@ bool SnazzCraft::Chunk::VoxelTouchingChunkBorder(unsigned int VoxelIndex, unsign
     return false;
 }
 
-SnazzCraft::Voxel* SnazzCraft::Chunk::IsCollidingVoxel(const SnazzCraft::Hitbox* Hitbox)
+SnazzCraft::Voxel* SnazzCraft::Chunk::GetCollidingVoxel(const SnazzCraft::Hitbox* Hitbox)
 {
-    int Range[3] = {
-
-    };
-
     int VPosition[3];
     this->WorldSpaceToVoxelSpace(Hitbox->Position, VPosition);
 
@@ -170,6 +166,25 @@ SnazzCraft::Voxel* SnazzCraft::Chunk::IsCollidingVoxel(const SnazzCraft::Hitbox*
     }
     }
     }
+
+    return nullptr;
+}
+
+SnazzCraft::Voxel* SnazzCraft::Chunk::GetCollidingVoxel(const glm::vec3& Position)
+{
+    int VPosition[3];
+    glm::vec3 CheckPosition = Position;
+    this->WorldSpaceToVoxelSpace(CheckPosition, VPosition);
+
+    if (!VALID_VOXEL_POSITION(VPosition[0], VPosition[1], VPosition[2])) return nullptr;
+
+    auto VoxelIterator = this->Voxels->find(VOXEL_INDEX(VPosition[0], VPosition[1], VPosition[2]));
+    if (VoxelIterator == this->Voxels->end()) return nullptr;
+
+    if (!VoxelIterator->second.Collidable) return nullptr;
+
+    this->VoxelCollisionHitbox->Position = this->VoxelPositionToWorldPosition(VPosition[0], VPosition[1], VPosition[2]); 
+    if (this->VoxelCollisionHitbox->IsColliding(CheckPosition)) return &VoxelIterator->second;
 
     return nullptr;
 }

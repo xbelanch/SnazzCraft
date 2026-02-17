@@ -41,12 +41,20 @@ bool SnazzCraft::World::GenerateChunk(unsigned int X, unsigned int Z)
     return true;
 }
 
-void SnazzCraft::World::RenderChunks()
+void SnazzCraft::World::RenderChunks(SnazzCraft::User* Player)
 { 
-    for (auto& ChunkPair : *this->Chunks) {
-        if (ChunkPair.second->ChunkMesh == nullptr) continue;
+    int PlayerChunkPosition[2];
+    SnazzCraft::Chunk::GetChunkPosition(Player->Position, PlayerChunkPosition);
 
-        ChunkPair.second->ChunkMesh->Draw();
+    for (int X = PlayerChunkPosition[0] - static_cast<int>(this->RenderDistance); X <= PlayerChunkPosition[0] + static_cast<int>(this->RenderDistance); X++) {
+    for (int Z = PlayerChunkPosition[1] - static_cast<int>(this->RenderDistance); Z <= PlayerChunkPosition[1] + static_cast<int>(this->RenderDistance); Z++) {
+        if (X < 0 || X >= this->Size || Z < 0 || Z >= this->Size) continue;
+
+        auto ChunkIterator = this->Chunks->find(INDEX_2D(X, Z, static_cast<int>(this->Size)));
+        if (ChunkIterator == this->Chunks->end()) continue;
+
+        ChunkIterator->second->ChunkMesh->Draw();
+    }
     }
 }
 
@@ -58,7 +66,7 @@ void SnazzCraft::World::OptimizeChunks()
     }
 }
 
-SnazzCraft::Voxel* SnazzCraft::World::IsCollidingVoxel(const SnazzCraft::Hitbox* Hitbox)
+SnazzCraft::Voxel* SnazzCraft::World::GetCollidingVoxel(const SnazzCraft::Hitbox* Hitbox)
 {
     int ChunkX = static_cast<int>(Hitbox->Position.x / (SnazzCraft::Chunk::Width * SnazzCraft::Voxel::Size));
     int ChunkZ = static_cast<int>(Hitbox->Position.z / (SnazzCraft::Chunk::Depth * SnazzCraft::Voxel::Size));
@@ -70,10 +78,26 @@ SnazzCraft::Voxel* SnazzCraft::World::IsCollidingVoxel(const SnazzCraft::Hitbox*
         auto ChunkIterator = this->Chunks->find(INDEX_2D(X, Z, this->Size));
         if (ChunkIterator == this->Chunks->end()) continue;
 
-        SnazzCraft::Voxel* CollisionVoxel = ChunkIterator->second->IsCollidingVoxel(Hitbox);
+        SnazzCraft::Voxel* CollisionVoxel = ChunkIterator->second->GetCollidingVoxel(Hitbox);
         if (CollisionVoxel != nullptr) return CollisionVoxel;
     }
     }
+
+    return nullptr;
+}
+
+SnazzCraft::Voxel* SnazzCraft::World::GetCollidingVoxel(const glm::vec3& Position)
+{
+    int ChunkX = static_cast<int>(Position.x / (SnazzCraft::Chunk::Width * SnazzCraft::Voxel::Size));
+    int ChunkZ = static_cast<int>(Position.z / (SnazzCraft::Chunk::Depth * SnazzCraft::Voxel::Size));
+
+    if (ChunkX < 0 || ChunkZ < 0 || ChunkX >= static_cast<int>(this->Size) || ChunkZ >= static_cast<int>(this->Size)) return nullptr;
+
+    auto ChunkIterator = this->Chunks->find(INDEX_2D(ChunkX, ChunkZ, this->Size));
+    if (ChunkIterator == this->Chunks->end()) return nullptr;
+
+    SnazzCraft::Voxel* CollisionVoxel = ChunkIterator->second->GetCollidingVoxel(Position);
+    if (CollisionVoxel != nullptr) return CollisionVoxel;
 
     return nullptr;
 }
@@ -89,7 +113,7 @@ void SnazzCraft::World::MoveEntity(SnazzCraft::Entity* Entity, const glm::vec3& 
         Entity->Position[I] = NewPosition[I];
         Entity->EntityHitbox->Position[I] = NewPosition[I];
 
-        SnazzCraft::Voxel* CollisionVoxel = this->IsCollidingVoxel(Entity->EntityHitbox);
+        SnazzCraft::Voxel* CollisionVoxel = this->GetCollidingVoxel(Entity->EntityHitbox);
         if (CollisionVoxel == nullptr) continue;
 
         Entity->Position[I] = OldCoordinate;
@@ -105,7 +129,7 @@ void SnazzCraft::World::MoveEntity(glm::vec3 Translation, SnazzCraft::Entity* En
         Entity->Position[I] += Translation[I];
         Entity->EntityHitbox->Position[I] = Entity->Position[I];
 
-        SnazzCraft::Voxel* CollisionVoxel = this->IsCollidingVoxel(Entity->EntityHitbox);
+        SnazzCraft::Voxel* CollisionVoxel = this->GetCollidingVoxel(Entity->EntityHitbox);
         if (CollisionVoxel == nullptr) continue;
 
         Entity->Position[I] = OldCoordinate;
@@ -133,7 +157,7 @@ void SnazzCraft::World::UpdateLighting()
 
 void SnazzCraft::World::ApplyLighting(int LightOrigin[3], int LightProducingLevel)
 {
-    auto OutsideWorld = [this](int X, int Y, int Z) -> bool
+    auto IsOutsideWorld = [this](int X, int Y, int Z) -> bool
     {
         return X < 0 || Y < 0 || Z < 0 || X >= static_cast<int>(this->Size) * SnazzCraft::Chunk::Width || Y >= SnazzCraft::Chunk::Height || Z >= static_cast<int>(this->Size) * SnazzCraft::Chunk::Depth;
     };
@@ -150,27 +174,24 @@ void SnazzCraft::World::ApplyLighting(int LightOrigin[3], int LightProducingLeve
     for (int X = LightOrigin[0] - LightProducingLevel; X <= LightOrigin[0] + LightProducingLevel; X++) {
     for (int Y = LightOrigin[1] - LightProducingLevel; Y <= LightOrigin[1] + LightProducingLevel; Y++) {
     for (int Z = LightOrigin[2] - LightProducingLevel; Z <= LightOrigin[2] + LightProducingLevel; Z++) {
-        if (OutsideWorld(X, Y, Z)) continue;
+        if (IsOutsideWorld(X, Y, Z)) continue;
 
-        int ChunkX = X / SnazzCraft::Chunk::Width;
-        int ChunkZ = Z / SnazzCraft::Chunk::Depth;
-        auto ChunkIterator = this->Chunks->find(INDEX_2D(ChunkX, ChunkZ, this->Size));
+        int ChunkCoordinates[2];
+        SnazzCraft::Chunk::GetChunkPosition(X, Z, ChunkCoordinates);
+        auto ChunkIterator = this->Chunks->find(INDEX_2D(ChunkCoordinates[0], ChunkCoordinates[1], this->Size));
         if (ChunkIterator == this->Chunks->end()) continue;
-
-        int LocalX = X % SnazzCraft::Chunk::Width;
-        int LocalY = Y % SnazzCraft::Chunk::Height;
-        int LocalZ = Z % SnazzCraft::Chunk::Depth;
 
         int LightValue = GetLightValue(X, Y, Z);
         if (LightValue <= 0) continue;
 
-        int LightIndex = INDEX_3D(LocalX, LocalY, LocalZ, SnazzCraft::Chunk::Width, SnazzCraft::Chunk::Height);
+        int Local[3];
+        SnazzCraft::Chunk::GetLocalVoxelPosition(X, Y, Z, Local);
+        int LightIndex = INDEX_3D(Local[0], Local[1], Local[2], SnazzCraft::Chunk::Width, SnazzCraft::Chunk::Height);
         auto LightIterator = ChunkIterator->second->LightValues->find(LightIndex);
 
         if (LightIterator == ChunkIterator->second->LightValues->end()) {
             ChunkIterator->second->LightValues->insert_or_assign(LightIndex, LightValue);
-        } else {
-            if (LightIterator->second >= LightValue) continue;
+        } else if (LightIterator->second < LightValue) {
             ChunkIterator->second->LightValues->insert_or_assign(LightIndex, LightValue);
         }
     }
@@ -178,7 +199,126 @@ void SnazzCraft::World::ApplyLighting(int LightOrigin[3], int LightProducingLeve
     }
 }
 
-SnazzCraft::World* SnazzCraft::CreateWorld(std::string Name, unsigned int Size, int Seed)
+bool SnazzCraft::World::SaveWorldToFile(bool OverwriteExistingFile)
+{
+    const std::string FileDirectory = "worlds/";
+    const std::string FileExtension = ".txt";
+
+    std::string FilePath = FileDirectory + this->Name + FileExtension;
+    std::ofstream File;
+
+    if (std::filesystem::exists(FilePath) && !OverwriteExistingFile) {
+        return false;
+    } else {
+        File.open(FilePath);
+    }
+
+    File << WORLD_SAVE_FILE_DESCRIPTOR_NAME       << ": " << this->Name << "\n";
+    File << WORLD_SAVE_FILE_DESCRIPTOR_SIZE       << ": " << this->Size << "\n";
+    File << WORLD_SAVE_FILE_DESCRIPTOR_WORLD_SEED << ": " << this->Seed << "\n";
+
+    for (auto& ChunkPair : *this->Chunks) {
+        SnazzCraft::Chunk* Chunk = ChunkPair.second;
+
+        File << WORLD_SAVE_FILE_DESCRIPTOR_CHUNK_BEGIN << ": " << Chunk->Position[0] << " " << Chunk->Position[1] << "\n";
+
+        for (auto& VoxelPair : *Chunk->Voxels) {
+            File << WORLD_SAVE_FILE_DESCRIPTOR_CHUNK_NEW_VOXEL << ": " << VoxelPair.second.Position[0] << " " << VoxelPair.second.Position[1] << " " << VoxelPair.second.Position[2] << " " << VoxelPair.second.ID << "\n";
+        }
+
+        File << WORLD_SAVE_FILE_DESCRIPTOR_CHUNK_END << ":\n";
+    }
+
+    File.close();
+    return true;
+}
+
+bool SnazzCraft::World::PlaceBlock(SnazzCraft::User* Player)
+{
+    SnazzCraft::World::VoxelDDAResult* Result = this->MarchDDAToVoxel(Player->Position, SnazzCraft::CalculateFrontVector(Player->Rotation, true), 10.0f);
+    if (Result->CollidedWithVoxel) { delete Result; return false; }
+
+
+
+    return true;
+}
+
+SnazzCraft::World::VoxelDDAResult* SnazzCraft::World::MarchDDAToVoxel(const glm::vec3& StartingPosition, const glm::vec3& FrontVector, float MaxDistance)
+{
+    SnazzCraft::World::VoxelDDAResult* Result = new SnazzCraft::World::VoxelDDAResult();
+
+    glm::vec3 RayDir = glm::normalize(FrontVector);
+    glm::vec3 Position = StartingPosition;
+
+    // World-space voxel
+    glm::ivec3 Voxel = glm::floor(Position);
+
+    glm::ivec3 Step(
+        RayDir.x > 0 ? 1 : -1,
+        RayDir.y > 0 ? 1 : -1,
+        RayDir.z > 0 ? 1 : -1
+    );
+
+    glm::vec3 Delta(
+        SnazzCraft::Voxel::Size / glm::abs(RayDir.x),
+        SnazzCraft::Voxel::Size / glm::abs(RayDir.y),
+        SnazzCraft::Voxel::Size / glm::abs(RayDir.z)
+    );
+
+    glm::vec3 NextBoundary(
+        (Step.x > 0 ? Voxel.x + 1 : Voxel.x) * SnazzCraft::Voxel::Size,
+        (Step.y > 0 ? Voxel.y + 1 : Voxel.y) * SnazzCraft::Voxel::Size,
+        (Step.z > 0 ? Voxel.z + 1 : Voxel.z) * SnazzCraft::Voxel::Size
+    );
+
+    glm::vec3 Max(
+        (NextBoundary.x - Position.x) / RayDir.x,
+        (NextBoundary.y - Position.y) / RayDir.y,
+        (NextBoundary.z - Position.z) / RayDir.z
+    );
+
+    float Distance = 0.0f;
+    float LastDistance = 0.0f;
+    while (Distance < MaxDistance)
+    {
+        SnazzCraft::Voxel* Hit = GetCollidingVoxel(Position);
+        if (Hit)
+        {
+            Result->CollidingVoxel = Hit;
+            Result->EndPosition = Position;
+            Result->CollidedWithVoxel = true;
+            return Result;
+        }
+
+        if (Max.x < Max.y && Max.x < Max.z)
+        {
+            Distance = Max.x;
+            Max.x += Delta.x;
+            Voxel.x += Step.x;
+        }
+        else if (Max.y < Max.z)
+        {
+            Distance = Max.y;
+            Max.y += Delta.y;
+            Voxel.y += Step.y;
+        }
+        else
+        {
+            Distance = Max.z;
+            Max.z += Delta.z;
+            Voxel.z += Step.z;
+        }
+
+        float StepDistance = Distance - LastDistance;
+        LastDistance = Distance;
+
+        SnazzCraft::MoveVector3DWithFront(Position, RayDir, StepDistance);
+    }
+
+    return Result;
+}
+
+SnazzCraft::World* SnazzCraft::World::CreateWorld(std::string Name, unsigned int Size, int Seed)
 {
     SnazzCraft::World* NewWorld = new SnazzCraft::World(Name, Size, Seed);
 
@@ -191,7 +331,7 @@ SnazzCraft::World* SnazzCraft::CreateWorld(std::string Name, unsigned int Size, 
     return NewWorld;
 }
 
-SnazzCraft::World* SnazzCraft::LoadWorldFromSaveFile(std::string FilePath)
+SnazzCraft::World* SnazzCraft::World::LoadWorldFromSaveFile(std::string FilePath)
 {
     std::ifstream File(FilePath);
     if (!File.is_open()) return nullptr;
@@ -310,39 +450,5 @@ SnazzCraft::World* SnazzCraft::LoadWorldFromSaveFile(std::string FilePath)
     return NewWorld;
 }
 
-bool SnazzCraft::SaveWorldToFile(SnazzCraft::World* World, bool OverwriteExistingFile)
-{
-    if (World == nullptr) return false;
 
-    const std::string FileDirectory = "worlds/";
-    const std::string FileExtension = ".txt";
-
-    std::string FilePath = FileDirectory + World->Name + FileExtension;
-    std::ofstream File;
-
-    if (std::filesystem::exists(FilePath) && !OverwriteExistingFile) {
-        return false;
-    } else {
-        File.open(FilePath);
-    }
-
-    File << WORLD_SAVE_FILE_DESCRIPTOR_NAME       << ": " << World->Name << "\n";
-    File << WORLD_SAVE_FILE_DESCRIPTOR_SIZE       << ": " << World->Size << "\n";
-    File << WORLD_SAVE_FILE_DESCRIPTOR_WORLD_SEED << ": " << World->Seed << "\n";
-
-    for (auto& ChunkPair : *World->Chunks) {
-        SnazzCraft::Chunk* Chunk = ChunkPair.second;
-
-        File << WORLD_SAVE_FILE_DESCRIPTOR_CHUNK_BEGIN << ": " << Chunk->Position[0] << " " << Chunk->Position[1] << "\n";
-
-        for (auto& VoxelPair : *Chunk->Voxels) {
-            File << WORLD_SAVE_FILE_DESCRIPTOR_CHUNK_NEW_VOXEL << ": " << VoxelPair.second.Position[0] << " " << VoxelPair.second.Position[1] << " " << VoxelPair.second.Position[2] << " " << VoxelPair.second.ID << "\n";
-        }
-
-        File << WORLD_SAVE_FILE_DESCRIPTOR_CHUNK_END << ":\n";
-    }
-
-    File.close();
-    return true;
-}
 

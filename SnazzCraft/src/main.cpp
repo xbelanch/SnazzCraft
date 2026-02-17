@@ -9,9 +9,10 @@ int main(int ArgC, char* ArgV[])
         return -1;
     }
 
-    if (ArgC == 2) {
+    if (ArgC == 2) 
+    {
         std::string WorldFilePath = "worlds/" + std::string(ArgV[1]) + ".txt";
-        SnazzCraft::CurrentWorld = SnazzCraft::LoadWorldFromSaveFile(WorldFilePath);
+        SnazzCraft::CurrentWorld = SnazzCraft::World::LoadWorldFromSaveFile(WorldFilePath);
     }
 
     SnazzCraft::MainLoop();

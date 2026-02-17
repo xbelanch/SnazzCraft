@@ -34,7 +34,7 @@ void SnazzCraft::GUI::Render()
     this->WidgetCollections[this->ActiveWidgetCollectionIndex]->Draw();
 }
 
-void SnazzCraft::GUI::HandleLeftMouseClick(SnazzCraft::Event* Event)
+void SnazzCraft::GUI::SendEventToButtons(SnazzCraft::Event* Event)
 {
     if (this->WidgetCollections[this->ActiveWidgetCollectionIndex] == nullptr) return;
    

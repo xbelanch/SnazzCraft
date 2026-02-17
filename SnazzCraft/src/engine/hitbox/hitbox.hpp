@@ -19,6 +19,13 @@ namespace SnazzCraft
                    (glm::abs(this->Position.z - CollideHitbox.Position.z) <= (this->HalfDimensions.z + CollideHitbox.HalfDimensions.z));
         }
 
+        inline bool IsColliding(const glm::vec3& Point)
+        {
+            return (glm::abs(this->Position.x - Point.x) <= this->HalfDimensions.x) &&
+                   (glm::abs(this->Position.y - Point.y) <= this->HalfDimensions.y) &&
+                   (glm::abs(this->Position.z - Point.z) <= this->HalfDimensions.z);
+        }
+
         inline void UpdateDimensions(const glm::vec3& NewDimensions)
         {
             this->HalfDimensions = NewDimensions / 2.0f;

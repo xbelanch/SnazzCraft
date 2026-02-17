@@ -4,7 +4,7 @@ SnazzCraft::InWorldGUI* SnazzCraft::WorldGUI = nullptr;
 
 SnazzCraft::InWorldGUI::InWorldGUI(unsigned int WindowWidth, unsigned int WindowHeight, GLFWwindow* Window) : SnazzCraft::GUI(WindowWidth, WindowHeight)
 {
-    this->GUIInputHandler = new SnazzCraft::InputHandler(Window);
+    this->SetInputHandler(new SnazzCraft::InputHandler(Window));
 
     this->WidgetCollections.push_back(new SnazzCraft::WidgetCollection());
     this->ActiveWidgetCollectionIndex = 1;
