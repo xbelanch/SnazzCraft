@@ -1,4 +1,4 @@
-#include "height-map.hpp"
+#include "snazzcraft-engine/height-map/height-map.hpp"
 
 SnazzCraft::HeightMap::HeightMap(unsigned int Size, int HeightConstraintLow, int HeightConstraintHigh, int Seed, double Frequency, double Persistence, double Lacunarity, int OctaveCount)
 {

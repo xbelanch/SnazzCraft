@@ -1,4 +1,4 @@
-#include "core.hpp"
+#include "snazzcraft-engine/core/core.hpp"
 
 Shader* SnazzCraft::VoxelShader = nullptr;
 

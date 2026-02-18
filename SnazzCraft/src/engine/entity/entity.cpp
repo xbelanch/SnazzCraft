@@ -1,4 +1,4 @@
-#include "entity.hpp"
+#include "snazzcraft-engine/entity/entity.hpp"
 
 SnazzCraft::Entity::Entity(glm::vec3 Position, glm::vec3 Rotation)
 {

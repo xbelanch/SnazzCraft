@@ -1,4 +1,4 @@
-#include "texture.hpp"
+#include "snazzcraft-engine/texture/texture.hpp"
 
 SnazzCraft::Texture* SnazzCraft::VoxelTextureAtlas = nullptr;
 

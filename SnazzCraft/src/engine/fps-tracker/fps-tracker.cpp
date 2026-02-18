@@ -1,4 +1,4 @@
-#include "fps-tracker.hpp"
+#include "snazzcraft-engine/fps-tracker/fps-tracker.hpp"
 
 SnazzCraft::FPSTracker* SnazzCraft::GlobalFPSTracker = new SnazzCraft::FPSTracker();
 

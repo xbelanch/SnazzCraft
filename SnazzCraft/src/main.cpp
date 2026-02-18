@@ -1,6 +1,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 
-#include "engine/core/core.hpp"
+#include "snazzcraft-engine/core/core.hpp"
 
 int main(int ArgC, char* ArgV[])
 { 

@@ -1,0 +1,36 @@
+#include "snazzcraft-engine/entity/user.hpp"
+
+const glm::vec3 UserHitboxDimensions = glm::vec3(1.75f, 5.75f, 1.75f);
+
+SnazzCraft::User* SnazzCraft::Player = new SnazzCraft::User({ 100.0f, 70.0f, 100.0f }, { 0.0f, 0.0f, 0.0f });
+
+SnazzCraft::User::User(glm::vec3 Position, glm::vec3 Rotation) : SnazzCraft::Entity(Position, Rotation)
+{
+    this->SetHitbox(UserHitboxDimensions);
+}
+
+void SnazzCraft::User::Move(const glm::vec3& AdditionalRotation, float Distance) 
+{
+    float PreviousY = this->Position.y;
+    MoveVector3D(this->Position, this->Rotation + AdditionalRotation, Distance);
+    this->Position.y = PreviousY;
+    
+    if (this->EntityHitbox != nullptr) this->EntityHitbox->Position = this->Position + this->HitboxOffset;
+}
+
+void SnazzCraft::User::Rotate(const glm::vec3& AdditionalRotation) 
+{
+    this->Rotation[0] += AdditionalRotation[0];
+    this->Rotation[0] += this->Rotation[0] >  180.0f ? -360.0f : 0.0f;
+    this->Rotation[0] += this->Rotation[0] < -180.0f ?  360.0f : 0.0f;
+
+    this->Rotation[1] += AdditionalRotation[1];
+    this->Rotation[1] += this->Rotation[1] >  180.0f ? -360.0f : 0.0f;
+    this->Rotation[1] += this->Rotation[1] < -180.0f ?  360.0f : 0.0f;
+
+    this->Rotation[2] += AdditionalRotation[2];
+    this->Rotation[2] = this->Rotation[2] >  89.999f ?  89.999f : this->Rotation[2];
+    this->Rotation[2] = this->Rotation[2] < -89.999f ? -89.999f : this->Rotation[2];
+    
+    this->Front = SnazzCraft::CalculateFrontVector(this->Rotation, true);
+}

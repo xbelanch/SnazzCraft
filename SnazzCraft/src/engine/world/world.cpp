@@ -1,4 +1,4 @@
-#include "world.hpp"
+#include "snazzcraft-engine/world/world.hpp"
 
 SnazzCraft::World* SnazzCraft::CurrentWorld = nullptr;
 

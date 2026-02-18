@@ -1,4 +1,4 @@
-#include "mesh.hpp"
+#include "snazzcraft-engine/mesh/mesh.hpp"
 
 SnazzCraft::Mesh* SnazzCraft::VoxelMesh = nullptr;
 
