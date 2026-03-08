@@ -18,7 +18,7 @@ SnazzCraft::Texture::~Texture()
 {
     this->DeleteBoundData();
     
-    if (this->ID != nullptr) delete this->ID;
+    delete this->ID;
 }
 
 void SnazzCraft::Texture::LoadTexture(const char* FilePath)
@@ -44,7 +44,7 @@ void SnazzCraft::Texture::CreateTextureFromString(std::string Text, unsigned cha
         char Character = std::tolower(Text[CharIndex]);
 
         std::string FilePath;
-        switch (Character)
+        switch (Character) // Special cases
         {
             case ' ':
                 FilePath = "textures/gui/font/space.txt";
@@ -98,7 +98,7 @@ bool SnazzCraft::Texture::OverlayNewTexture(const char* FilePath, int OffsetX, i
         }
     }
 
-    glDeleteTextures(1, &*this->ID);
+    glDeleteTextures(1, this->ID);
     this->SetTexture();
 
     return true;

@@ -104,10 +104,5 @@ namespace SnazzCraft
     };
 
     
-
-    
-
-    
-
     extern SnazzCraft::World* CurrentWorld;
 }

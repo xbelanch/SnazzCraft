@@ -14,8 +14,8 @@ SnazzCraft::VoxelTextureApplier::~VoxelTextureApplier()
 
 std::vector<SnazzCraft::Vertice3D> SnazzCraft::VoxelTextureApplier::GetTexturedVertices(const SnazzCraft::Voxel& Voxel)
 {
-    const glm::vec2 HalfPixel(HALF_PIXEL, HALF_PIXEL);   
-    const int HalfVoxelSize = static_cast<int>(SnazzCraft::Voxel::Size / 2.0f);
+    constexpr glm::vec2 HalfPixel(HALF_PIXEL, HALF_PIXEL);   
+    constexpr int HalfVoxelSize = static_cast<int>(SnazzCraft::Voxel::Size / 2.0f);
 
     std::vector<SnazzCraft::Vertice3D> Vertices;
 

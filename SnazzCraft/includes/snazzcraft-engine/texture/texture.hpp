@@ -54,7 +54,7 @@ namespace SnazzCraft
             if (this->Data == nullptr) return;
 
             delete[] this->Data;
-            glDeleteTextures(1, &*this->ID);
+            glDeleteTextures(1, this->ID);
         }
     };
 

@@ -11,7 +11,7 @@ namespace SnazzCraft
     class Voxel
     {
     public:
-        const static unsigned int Size = 2;
+        static constexpr unsigned int Size = 2;
 
         unsigned int Position[3]; // In local chunk space
         unsigned int ID;
