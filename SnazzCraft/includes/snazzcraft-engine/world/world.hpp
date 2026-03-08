@@ -42,13 +42,11 @@ namespace SnazzCraft
 
         unsigned int RenderDistance = 50;
 
-        std::unordered_map<unsigned int, SnazzCraft::Chunk*>* Chunks;
-
         World(std::string Name, unsigned int Size, int Seed);
 
         ~World();
 
-        bool GenerateChunk(unsigned int X, unsigned int Z);
+        bool GenerateChunk(unsigned int X, unsigned int Z, bool Overwrive = false);
 
         void RenderChunks(SnazzCraft::User* Player);
 
@@ -66,7 +64,7 @@ namespace SnazzCraft
 
         inline void ApplyGravityToEntities(std::vector<SnazzCraft::Entity*> AdditionalEntities)
         {
-            const float MoveDistance = 0.2f;
+            constexpr float MoveDistance = 0.2f;
 
             for (auto& ChunkPair : *this->Chunks) {
                 for (SnazzCraft::Entity* Entity : ChunkPair.second->Entities) {
@@ -80,6 +78,8 @@ namespace SnazzCraft
         }
 
     private:
+        std::unordered_map<unsigned int, SnazzCraft::Chunk*>* Chunks;
+
         void ApplyLighting(int LightOrigin[3], int LightProducingLevel) const;
 
         void InitializeAndAddChunk(unsigned int X, unsigned int Z) const;

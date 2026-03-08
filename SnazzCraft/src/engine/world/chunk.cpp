@@ -35,8 +35,6 @@ SnazzCraft::Chunk::~Chunk()
 
 void SnazzCraft::Chunk::Generate(SnazzCraft::HeightMap* HeightMap, unsigned int MapWidth)
 {
-    std::lock_guard<std::mutex> Lock(this->Mutex);
-
     unsigned int HeightMapOffsetX = this->Position[0] * SnazzCraft::Chunk::Width;
     unsigned int HeightMapOffsetZ = this->Position[1] * SnazzCraft::Chunk::Depth;
 
@@ -66,15 +64,13 @@ void SnazzCraft::Chunk::Generate(SnazzCraft::HeightMap* HeightMap, unsigned int 
 
 void SnazzCraft::Chunk::UpdateMesh()
 {
-    std::lock_guard<std::mutex> Lock(this->Mutex);
-
     delete this->ChunkMesh;
 
     std::vector<SnazzCraft::Vertice3D> NewTexturedVertices;
     std::vector<unsigned int> NewIndices;
 
     for (const auto& VoxelPair : *this->OptimizedVoxels) {
-        glm::vec3 Offset = glm::vec3((float)VoxelPair.second.Position[0], (float)VoxelPair.second.Position[1], (float)VoxelPair.second.Position[2]) * glm::vec3((float)SnazzCraft::Voxel::Size, (float)SnazzCraft::Voxel::Size, (float)SnazzCraft::Voxel::Size) + this->ChunkWorldOffset; 
+        const glm::vec3 Offset = glm::vec3((float)VoxelPair.second.Position[0], (float)VoxelPair.second.Position[1], (float)VoxelPair.second.Position[2]) * glm::vec3((float)SnazzCraft::Voxel::Size, (float)SnazzCraft::Voxel::Size, (float)SnazzCraft::Voxel::Size) + this->ChunkWorldOffset; 
         unsigned int NewVerticesCount = 0;
 
         std::vector<SnazzCraft::Vertice3D> Vertices = SnazzCraft::EngineVoxelTextureApplier->GetTexturedVertices(VoxelPair.second);
@@ -103,8 +99,6 @@ void SnazzCraft::Chunk::UpdateMesh()
 
 void SnazzCraft::Chunk::CullVoxelFaces()
 {
-    std::lock_guard<std::mutex> Lock(this->Mutex);
-
     this->OptimizedVoxels->clear();
 
     for (auto VoxelPair : *this->Voxels)  {

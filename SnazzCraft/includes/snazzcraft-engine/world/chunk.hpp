@@ -3,8 +3,6 @@
 #include <unordered_map>
 #include <vector>
 #include <array>
-#include <mutex>
-#include <thread>
 
 #include "../../glm/glm.hpp"
 
@@ -33,7 +31,6 @@ namespace SnazzCraft
         glm::vec3 ChunkWorldOffset;
 
         SnazzCraft::Mesh* ChunkMesh = nullptr;
-        std::mutex Mutex;
 
         std::unordered_map<unsigned int, SnazzCraft::Voxel>* Voxels          = new std::unordered_map<unsigned int, SnazzCraft::Voxel>();
         std::unordered_map<unsigned int, SnazzCraft::Voxel>* OptimizedVoxels = new std::unordered_map<unsigned int, SnazzCraft::Voxel>();

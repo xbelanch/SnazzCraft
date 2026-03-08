@@ -22,16 +22,20 @@ SnazzCraft::World::~World()
     delete this->Chunks;
 }
 
-bool SnazzCraft::World::GenerateChunk(unsigned int X, unsigned int Z)
+bool SnazzCraft::World::GenerateChunk(unsigned int X, unsigned int Z, bool Overwrite)
 {
     auto Iterator = this->Chunks->find(INDEX_2D(X, Z, this->Size));
-    if (Iterator != this->Chunks->end()) return false;
-    
+    if (Iterator != this->Chunks->end()) {
+        if (!Overwrite) return false;
+
+        delete Iterator->second;
+        this->Chunks->erase(Iterator);
+    }
+
     SnazzCraft::Chunk* NewChunk = new SnazzCraft::Chunk(X, Z);
     NewChunk->Generate(this->WorldHeightMap, this->Size * SnazzCraft::Chunk::Width);
     NewChunk->CullVoxelFaces();
     NewChunk->UpdateMesh();
-
     (*this->Chunks)[INDEX_2D(X, Z, this->Size)] = NewChunk;
 
     return true;
@@ -127,7 +131,7 @@ void SnazzCraft::World::MoveEntity(glm::vec3 Translation, SnazzCraft::Entity* En
 
 void SnazzCraft::World::UpdateLighting() const
 {
-    for (auto& ChunkPair : *this->Chunks) ChunkPair.second->LightValues->clear();
+    for (auto& ChunkPair : *this->Chunks) { ChunkPair.second->LightValues->clear(); }
 
     for (auto& ChunkPair : *this->Chunks) {
     for (auto& VoxelPair : *ChunkPair.second->Voxels) {

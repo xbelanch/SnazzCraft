@@ -43,17 +43,20 @@ void SnazzCraft::Texture::CreateTextureFromString(std::string Text, unsigned cha
     {
         char Character = std::tolower(Text[CharIndex]);
 
-        std::string FilePath;
-        switch (Character) // Special cases
+        const std::string FilePath = [&]() -> std::string
         {
-            case ' ':
-                FilePath = "textures/gui/font/space.txt";
-                break;
+            switch (Character) // Special cases
+            {
+                case ' ':
+                    return "textures/gui/font/space.txt";
+                    break;
 
-            default:
-                FilePath = std::string("textures/gui/font/") + Character + ".txt";
-                break;
-        }
+                default:
+                    return std::string("textures/gui/font/") + Character + ".txt";
+                    break;
+            }
+        }();
+        
 
         std::ifstream CharacterFile(FilePath);
         for (unsigned int Y = 0; Y < SNAZZCRAFT_CHARACTER_BITWISE_HEIGHT; Y++) {

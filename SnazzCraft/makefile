@@ -18,7 +18,6 @@ all: bin/executable
 
 # Linking: $^ represents all the object files listed in $(OBJS)
 bin/executable: $(OBJS)
-	@mkdir -p bin
 	$(CPPC) $^ -o $@ $(LDFLAGS)
 
 # Rule for C++: Creates the subfolder in 'build' before compiling
