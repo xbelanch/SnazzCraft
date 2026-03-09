@@ -24,7 +24,7 @@ namespace SnazzCraft
             Represents dimensions
             Value of 0 represents that side is not visible    
         */
-        unsigned int Sides[6] = { 1, 1, 1, 1, 1, 1 }; 
+        bool Sides[6] = { true, true, true, true, true, true };
 
         Voxel(unsigned int X, unsigned int Y, unsigned int Z, unsigned int ID);
 
@@ -36,7 +36,7 @@ namespace SnazzCraft
         {
             unsigned int Count = 0;
             for (unsigned int I = 0; I < 6; I++) {
-                if (this->Sides[I] != 0) Count++;
+                if (this->Sides[I]) Count++;
             }
 
             return Count;

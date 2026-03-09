@@ -8,8 +8,8 @@ SnazzCraft::World::World(std::string Name, unsigned int Size, int Seed)
     this->Name = Name;
     this->Seed = Seed;
 
-    this->WorldHeightMap = new SnazzCraft::HeightMap(this->Size * SnazzCraft::Chunk::Width, 0, SnazzCraft:: Chunk::Height - 1, this->Seed, 1.0, 0.5, 2.0, 6);
     this->Chunks = new std::unordered_map<unsigned int, SnazzCraft::Chunk*>();
+    this->WorldHeightMap = new SnazzCraft::HeightMap(this->Size * SnazzCraft::Chunk::Width, 0, SnazzCraft:: Chunk::Height - 1, this->Seed, 1.0, 0.5, 2.0, 6);
 }
 
 SnazzCraft::World::~World()
@@ -22,23 +22,16 @@ SnazzCraft::World::~World()
     delete this->Chunks;
 }
 
-bool SnazzCraft::World::GenerateChunk(unsigned int X, unsigned int Z, bool Overwrite)
+void SnazzCraft::World::GenerateChunk(unsigned int X, unsigned int Z)
 {
     auto Iterator = this->Chunks->find(INDEX_2D(X, Z, this->Size));
-    if (Iterator != this->Chunks->end()) {
-        if (!Overwrite) return false;
-
-        delete Iterator->second;
-        this->Chunks->erase(Iterator);
-    }
+    if (Iterator != this->Chunks->end()) return;
 
     SnazzCraft::Chunk* NewChunk = new SnazzCraft::Chunk(X, Z);
     NewChunk->Generate(this->WorldHeightMap, this->Size * SnazzCraft::Chunk::Width);
     NewChunk->CullVoxelFaces();
     NewChunk->UpdateMesh();
     (*this->Chunks)[INDEX_2D(X, Z, this->Size)] = NewChunk;
-
-    return true;
 }
 
 void SnazzCraft::World::RenderChunks(SnazzCraft::User* Player)
@@ -51,7 +44,10 @@ void SnazzCraft::World::RenderChunks(SnazzCraft::User* Player)
         if (X < 0 || X >= this->Size || Z < 0 || Z >= this->Size) continue;
 
         auto ChunkIterator = this->Chunks->find(INDEX_2D(X, Z, static_cast<int>(this->Size)));
-        if (ChunkIterator == this->Chunks->end()) continue;
+        if (ChunkIterator == this->Chunks->end()) {
+            this->GenerateChunk(X, Z);
+            ChunkIterator = this->Chunks->find(INDEX_2D(X, Z, static_cast<int>(this->Size)));
+        }
 
         ChunkIterator->second->ChunkMesh->Draw();
     }
@@ -129,7 +125,7 @@ void SnazzCraft::World::MoveEntity(glm::vec3 Translation, SnazzCraft::Entity* En
     }
 }
 
-void SnazzCraft::World::UpdateLighting() const
+void SnazzCraft::World::UpdateAllLighting() const
 {
     for (auto& ChunkPair : *this->Chunks) { ChunkPair.second->LightValues->clear(); }
 

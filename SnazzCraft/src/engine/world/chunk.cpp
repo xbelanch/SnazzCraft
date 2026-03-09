@@ -84,7 +84,7 @@ void SnazzCraft::Chunk::UpdateMesh()
         }
         
         for (unsigned int SideIndex = 0; SideIndex < 6; SideIndex++) {
-            if (VoxelPair.second.Sides[SideIndex] == 0) continue;
+            if (!VoxelPair.second.Sides[SideIndex]) continue;
 
             for (unsigned int I = 0; I < 6; I++) {
                 NewIndices.push_back(SnazzCraft::VoxelMesh->Indices[(SideIndex * 6) + I] + NewTexturedVertices.size() - NewVerticesCount);
@@ -118,7 +118,7 @@ void SnazzCraft::Chunk::CullVoxelFaces()
 
             if (!CurrentIterator->second.Cullable) continue;
       
-            VoxelPair.second.Sides[I] = 0;
+            VoxelPair.second.Sides[I] = false;
         }
 
         if (VoxelPair.second.GetSideCount() != 0) this->OptimizedVoxels->insert({ VoxelPair.first, VoxelPair.second });

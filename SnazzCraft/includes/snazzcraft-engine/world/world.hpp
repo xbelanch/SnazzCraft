@@ -8,6 +8,8 @@
 #include <string>
 #include <iostream>
 #include <filesystem>
+#include <thread>
+#include <mutex>
 
 #include "chunk.hpp"
 #include "../height-map/height-map.hpp"
@@ -35,18 +37,14 @@ namespace SnazzCraft
         std::string Name = "UNASSIGNED";
         unsigned int Size; // Size^2 = #Chunks
         int Seed;
-
-        double HeightMapScale = 0.005; // Smaller = Smoother Terrain
-        double HeightMapHeightMultiplier = 32.0;
-        SnazzCraft::HeightMap* WorldHeightMap = nullptr;
-
+        
         unsigned int RenderDistance = 50;
 
         World(std::string Name, unsigned int Size, int Seed);
 
         ~World();
 
-        bool GenerateChunk(unsigned int X, unsigned int Z, bool Overwrive = false);
+        void GenerateChunk(unsigned int X, unsigned int Z);
 
         void RenderChunks(SnazzCraft::User* Player);
 
@@ -58,7 +56,7 @@ namespace SnazzCraft
 
         void MoveEntity(glm::vec3 Translation, SnazzCraft::Entity* Entity) const; // Returns true if movement occurred without voxel collision
 
-        void UpdateLighting() const;
+        void UpdateAllLighting() const;
 
         bool SaveWorldToFile(bool OverwriteExistingFile);
 
@@ -78,7 +76,10 @@ namespace SnazzCraft
         }
 
     private:
-        std::unordered_map<unsigned int, SnazzCraft::Chunk*>* Chunks;
+        std::unordered_map<unsigned int, SnazzCraft::Chunk*>* Chunks = nullptr;
+        mutable std::mutex ChunksMutex;
+
+        SnazzCraft::HeightMap* WorldHeightMap = nullptr;
 
         void ApplyLighting(int LightOrigin[3], int LightProducingLevel) const;
 
