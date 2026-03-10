@@ -18,6 +18,15 @@
 
 namespace SnazzCraft
 {
+    constexpr int VoxelCheckPositions[6][3] = {
+        {  0,  0, -1 }, // Front
+        { -1,  0,  0 }, // Left
+        {  1,  0,  0 }, // Right
+        {  0,  0,  1 }, // Back
+        {  0,  1,  0 }, // Top
+        {  0, -1,  0 }  // Bottom
+    };
+
     class Chunk
     {
     public:
@@ -77,7 +86,7 @@ namespace SnazzCraft
 
     
     public:
-        static inline void GetChunkPosition(const glm::vec3& Position, int OutChunkPosition[2]) // World space coordinates
+        static inline void GetChunkPosition(const glm::vec3& Position, int OutChunkPosition[2]) // Voxel space coordinates
         {
             OutChunkPosition[0] = static_cast<int>(Position.x) / SnazzCraft::Chunk::Width;
             OutChunkPosition[1] = static_cast<int>(Position.z) / SnazzCraft::Chunk::Depth;
@@ -97,8 +106,6 @@ namespace SnazzCraft
         }
 
     };
-
-    extern const int VoxelCheckPositions[6][3];
 }
 
 

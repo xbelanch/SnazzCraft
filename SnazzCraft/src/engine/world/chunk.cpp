@@ -1,14 +1,5 @@
 #include "snazzcraft-engine/world/chunk.hpp"
 
-const int SnazzCraft::VoxelCheckPositions[6][3] = {
-    {  0,  0, -1 }, // Front
-    { -1,  0,  0 }, // Left
-    {  1,  0,  0 }, // Right
-    {  0,  0,  1 }, // Back
-    {  0,  1,  0 }, // Top
-    {  0, -1,  0 }  // Bottom
-};
-
 SnazzCraft::Chunk::Chunk(int X, int Y)
 {
     this->Position[0] = X;
