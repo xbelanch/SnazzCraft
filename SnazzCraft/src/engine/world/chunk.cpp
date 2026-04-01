@@ -1,6 +1,6 @@
 #include "snazzcraft-engine/world/chunk.hpp"
 
-SnazzCraft::Chunk::Chunk(int X, int Y)
+SnazzCraft::Chunk::Chunk(int32_t X, int32_t Y)
 {
     this->Position[0] = X;
     this->Position[1] = Y;
@@ -12,6 +12,9 @@ SnazzCraft::Chunk::Chunk(int X, int Y)
     };
 
     this->VoxelCollisionHitbox = new SnazzCraft::Hitbox(glm::vec3(0.0f), glm::vec3((float)SnazzCraft::Voxel::Size, (float)SnazzCraft::Voxel::Size, (float)SnazzCraft::Voxel::Size));
+
+    this->Vertices = new std::vector<SnazzCraft::Vertice3D>();
+    this->Indices = new std::vector<uint32_t>();
 }
 
 SnazzCraft::Chunk::~Chunk()
@@ -22,20 +25,23 @@ SnazzCraft::Chunk::~Chunk()
 
     delete this->ChunkMesh;
     delete this->VoxelCollisionHitbox;
+
+    delete this->Vertices;
+    delete this->Indices;
 }
 
-void SnazzCraft::Chunk::Generate(SnazzCraft::HeightMap* HeightMap, unsigned int MapWidth)
+void SnazzCraft::Chunk::Generate(SnazzCraft::HeightMap* HeightMap, uint32_t MapWidth)
 {
-    unsigned int HeightMapOffsetX = this->Position[0] * SnazzCraft::Chunk::Width;
-    unsigned int HeightMapOffsetZ = this->Position[1] * SnazzCraft::Chunk::Depth;
+    uint32_t HeightMapOffsetX = this->Position[0] * SnazzCraft::Chunk::Width;
+    uint32_t HeightMapOffsetZ = this->Position[1] * SnazzCraft::Chunk::Depth;
 
-    for (unsigned int X = 0; X < SnazzCraft::Chunk::Width; X++) {
-    for (unsigned int Z = 0; Z < SnazzCraft::Chunk::Depth; Z++) {
+    for (uint32_t X = 0; X < SnazzCraft::Chunk::Width; X++) {
+    for (uint32_t Z = 0; Z < SnazzCraft::Chunk::Depth; Z++) {
         HeightMap->GenerateValue(X + HeightMapOffsetX, Z + HeightMapOffsetZ);
         auto HeightAtPositionIterator = HeightMap->HeightValues->find((Z + HeightMapOffsetZ) * MapWidth + (X + HeightMapOffsetX));
 
-        for (unsigned int Y = 0; Y < HeightAtPositionIterator->second; Y++) {
-            unsigned int NewVoxelID = ID_VOXEL_STONE;
+        for (uint32_t Y = 0; Y < HeightAtPositionIterator->second; Y++) {
+            uint32_t NewVoxelID = ID_VOXEL_STONE;
 
             if (HeightAtPositionIterator->second != 0 && Y == HeightAtPositionIterator->second - 1) NewVoxelID = ID_VOXEL_DIRT_GRASS_MIX;
             else if (HeightAtPositionIterator->second != 0 && Y >= HeightAtPositionIterator->second - 4) NewVoxelID = ID_VOXEL_DIRT;
@@ -53,16 +59,14 @@ void SnazzCraft::Chunk::Generate(SnazzCraft::HeightMap* HeightMap, unsigned int 
     }
 }
 
-void SnazzCraft::Chunk::UpdateMesh()
+void SnazzCraft::Chunk::UpdateVerticesAndIndices()
 {
-    delete this->ChunkMesh;
-
-    std::vector<SnazzCraft::Vertice3D> NewTexturedVertices;
-    std::vector<unsigned int> NewIndices;
+    this->Vertices->clear();
+    this->Indices->clear();
 
     for (const auto& VoxelPair : *this->OptimizedVoxels) {
         const glm::vec3 Offset = glm::vec3((float)VoxelPair.second.Position[0], (float)VoxelPair.second.Position[1], (float)VoxelPair.second.Position[2]) * glm::vec3((float)SnazzCraft::Voxel::Size, (float)SnazzCraft::Voxel::Size, (float)SnazzCraft::Voxel::Size) + this->ChunkWorldOffset; 
-        unsigned int NewVerticesCount = 0;
+        uint32_t NewVerticesCount = 0;
 
         std::vector<SnazzCraft::Vertice3D> Vertices = SnazzCraft::EngineVoxelTextureApplier->GetTexturedVertices(VoxelPair.second);
         this->ApplyBrightnessToVertices(Vertices, VoxelPair.second);
@@ -70,22 +74,18 @@ void SnazzCraft::Chunk::UpdateMesh()
         for (SnazzCraft::Vertice3D& Vertice3D : Vertices) { 
             Vertice3D.Position += Offset; // Adjusting to world space once now means not having to create a new model matrix for each individual chunk later
 
-            NewTexturedVertices.push_back(Vertice3D);
+            this->Vertices->push_back(Vertice3D);
             NewVerticesCount++; 
         }
         
-        for (unsigned int SideIndex = 0; SideIndex < 6; SideIndex++) {
+        for (uint32_t SideIndex = 0; SideIndex < 6; SideIndex++) {
             if (!VoxelPair.second.Sides[SideIndex]) continue;
 
-            for (unsigned int I = 0; I < 6; I++) {
-                NewIndices.push_back(SnazzCraft::VoxelMesh->Indices[(SideIndex * 6) + I] + NewTexturedVertices.size() - NewVerticesCount);
+            for (uint32_t I = 0; I < 6; I++) {
+                this->Indices->push_back(SnazzCraft::VoxelMesh->Indices[(SideIndex * 6) + I] + this->Vertices->size() - NewVerticesCount);
             }
         }
     }
-
-    if (NewTexturedVertices.empty() || NewIndices.empty()) { this->ChunkMesh = nullptr; return; }
-
-    this->ChunkMesh = new SnazzCraft::Mesh(NewTexturedVertices, NewIndices);
 }
 
 void SnazzCraft::Chunk::CullVoxelFaces()
@@ -95,8 +95,8 @@ void SnazzCraft::Chunk::CullVoxelFaces()
     for (auto VoxelPair : *this->Voxels)  {
         if (!VoxelPair.second.Cullable) { this->OptimizedVoxels->insert({ VoxelPair.first, VoxelPair.second }); continue; }
 
-        for (int I = 5; I >= 0; I--) {
-            int CheckPosition[3] = {
+        for (int32_t I = 5; I >= 0; I--) {
+            int32_t CheckPosition[3] = {
                 (int)(VoxelPair.second.Position[0]) + SnazzCraft::VoxelCheckPositions[I][0],
                 (int)(VoxelPair.second.Position[1]) + SnazzCraft::VoxelCheckPositions[I][1],
                 (int)(VoxelPair.second.Position[2]) + SnazzCraft::VoxelCheckPositions[I][2]
@@ -116,15 +116,15 @@ void SnazzCraft::Chunk::CullVoxelFaces()
     }
 }
 
-bool SnazzCraft::Chunk::VoxelTouchingChunkBorder(unsigned int VoxelIndex, unsigned int* BorderDirection) const
+bool SnazzCraft::Chunk::VoxelTouchingChunkBorder(uint32_t VoxelIndex, uint32_t* BorderDirection) const
 {
     auto VoxelIterator = this->Voxels->find(VoxelIndex);
     if (VoxelIterator == this->Voxels->end()) return false;
 
-    for (unsigned int I = 0; I < 6; I++) {
-        int CheckX = static_cast<int>(VoxelIterator->second.Position[0]) + SnazzCraft::VoxelCheckPositions[I][0];
-        int CheckY = static_cast<int>(VoxelIterator->second.Position[1]) + SnazzCraft::VoxelCheckPositions[I][1];
-        int CheckZ = static_cast<int>(VoxelIterator->second.Position[2]) + SnazzCraft::VoxelCheckPositions[I][2];
+    for (uint32_t I = 0; I < 6; I++) {
+        int32_t CheckX = static_cast<int>(VoxelIterator->second.Position[0]) + SnazzCraft::VoxelCheckPositions[I][0];
+        int32_t CheckY = static_cast<int>(VoxelIterator->second.Position[1]) + SnazzCraft::VoxelCheckPositions[I][1];
+        int32_t CheckZ = static_cast<int>(VoxelIterator->second.Position[2]) + SnazzCraft::VoxelCheckPositions[I][2];
 
         if (!VALID_LOCAL_VOXEL_POSITION(CheckX, CheckY, CheckZ)) {
             if (BorderDirection != nullptr) *BorderDirection = I;
@@ -138,18 +138,18 @@ bool SnazzCraft::Chunk::VoxelTouchingChunkBorder(unsigned int VoxelIndex, unsign
 
 SnazzCraft::Voxel* SnazzCraft::Chunk::GetCollidingVoxel(const SnazzCraft::Hitbox* Hitbox) const
 {
-    int Range[3] = {
+    int32_t Range[3] = {
         static_cast<int>(glm::ceil(Hitbox->HalfDimensions[0])),
         static_cast<int>(glm::ceil(Hitbox->HalfDimensions[1])),
         static_cast<int>(glm::ceil(Hitbox->HalfDimensions[2]))
     };
 
-    int VPosition[3];
+    int32_t VPosition[3];
     this->WorldSpaceToVoxelSpace(Hitbox->Position, VPosition);
 
-    for (int X = VPosition[0] - Range[0]; X <= VPosition[0] + Range[0]; X++) {
-    for (int Y = VPosition[1] - Range[1]; Y <= VPosition[1] + Range[1]; Y++) {
-    for (int Z = VPosition[2] - Range[2]; Z <= VPosition[2] + Range[2]; Z++) {
+    for (int32_t X = VPosition[0] - Range[0]; X <= VPosition[0] + Range[0]; X++) {
+    for (int32_t Y = VPosition[1] - Range[1]; Y <= VPosition[1] + Range[1]; Y++) {
+    for (int32_t Z = VPosition[2] - Range[2]; Z <= VPosition[2] + Range[2]; Z++) {
         SnazzCraft::Voxel* CollidingVoxel = this->GetCollidingVoxel(Hitbox, X, Y, Z);
         if (CollidingVoxel != nullptr) return CollidingVoxel;
     }
@@ -161,7 +161,7 @@ SnazzCraft::Voxel* SnazzCraft::Chunk::GetCollidingVoxel(const SnazzCraft::Hitbox
 
 SnazzCraft::Voxel* SnazzCraft::Chunk::GetCollidingVoxel(const glm::vec3& Position) const
 {
-    int VPosition[3];
+    int32_t VPosition[3];
     glm::vec3 CheckPosition = Position;
     this->WorldSpaceToVoxelSpace(CheckPosition, VPosition);
 
@@ -178,7 +178,7 @@ SnazzCraft::Voxel* SnazzCraft::Chunk::GetCollidingVoxel(const glm::vec3& Positio
     return nullptr;
 }
 
-SnazzCraft::Voxel* SnazzCraft::Chunk::GetCollidingVoxel(const SnazzCraft::Hitbox* Hitbox, int LocalVoxelX, int LocalVoxelY, int LocalVoxelZ) const
+SnazzCraft::Voxel* SnazzCraft::Chunk::GetCollidingVoxel(const SnazzCraft::Hitbox* Hitbox, int32_t LocalVoxelX, int32_t LocalVoxelY, int32_t LocalVoxelZ) const
 {
     if (!VALID_LOCAL_VOXEL_POSITION(LocalVoxelX, LocalVoxelY, LocalVoxelZ)) return nullptr;
 
@@ -193,9 +193,9 @@ SnazzCraft::Voxel* SnazzCraft::Chunk::GetCollidingVoxel(const SnazzCraft::Hitbox
     return &VoxelIterator->second;
 }
 
-void SnazzCraft::Chunk::ApplyBrightnessToVertices(std::vector<SnazzCraft::Vertice3D>& Vertices, const SnazzCraft::Voxel& Voxel) const
+void SnazzCraft::Chunk::ApplyBrightnessToVertices(std::vector<SnazzCraft::Vertice3D>& Vertices, const SnazzCraft::Voxel& Voxel)
 {
-    int LightApplyValue = 1;
+    int32_t LightApplyValue = 1;
 
     auto LightIterator = this->LightValues->find(INDEX_3D(Voxel.Position[0], Voxel.Position[1], Voxel.Position[2], SnazzCraft::Chunk::Width, SnazzCraft::Chunk::Height));
     if (LightIterator != this->LightValues->end()) {

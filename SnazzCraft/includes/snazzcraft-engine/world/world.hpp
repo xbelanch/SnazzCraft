@@ -10,6 +10,7 @@
 #include <filesystem>
 #include <thread>
 #include <mutex>
+#include <stdint.h>
 
 #include "chunk.hpp"
 #include "../height-map/height-map.hpp"
@@ -32,25 +33,25 @@ namespace SnazzCraft
     class World
     {
     public:
-        static constexpr unsigned int MaxSize = 2147483647; 
+        static constexpr uint32_t MaxSize = 2147483647u; 
 
         std::string Name = "UNASSIGNED";
-        unsigned int Size; // Size^2 = #Chunks
-        int Seed;
+        uint32_t Size; // Size^2 = #Chunks
+        int32_t Seed;
         
-        unsigned int RenderDistance = 50;
+        uint32_t RenderDistance = 50;
 
-        World(std::string Name, unsigned int Size, int Seed);
+        World(std::string Name, uint32_t Size, int32_t Seed);
 
         ~World();
 
-        void GenerateChunk(unsigned int X, unsigned int Z, bool UpdateLighting);
+        void GenerateChunk(uint32_t X, uint32_t Z);
 
         void RenderChunks(SnazzCraft::User* Player);
 
-        SnazzCraft::Voxel* GetCollidingVoxel(const SnazzCraft::Hitbox* Hitbox) const; // Returns nullptr if no collision
+        SnazzCraft::Voxel* GetCollidingVoxel(const SnazzCraft::Hitbox* Hitbox) const; // Returns nullptr if no collision & not thread safe
 
-        SnazzCraft::Voxel* GetCollidingVoxel(const glm::vec3& Position) const; // Returns nullptr if no collision
+        SnazzCraft::Voxel* GetCollidingVoxel(const glm::vec3& Position) const; // Returns nullptr if no collision & not thread safe
 
         void MoveEntity(SnazzCraft::Entity* Entity, const glm::vec3& Rotation, float Distance) const; // Returns true if movement occurred without voxel collision
 
@@ -76,34 +77,56 @@ namespace SnazzCraft
         }
 
     private:
-        std::unordered_map<unsigned int, SnazzCraft::Chunk*>* Chunks = nullptr;
+        std::vector<SnazzCraft::Chunk*>* ChunkMeshUpdateQueue = nullptr;
+        mutable std::mutex ChunkMeshUpdateQueueMutex;
+
+        std::unordered_map<uint32_t, SnazzCraft::Chunk*>* Chunks = nullptr;
+        mutable std::mutex ChunkMutex;
 
         SnazzCraft::HeightMap* WorldHeightMap = nullptr;
+        mutable std::mutex HeightMapMutex;
 
-        void ApplyLightingVoxel(int LightOrigin[3], int LightProducingLevel, bool AutoUpdateChunks) const;
+        std::unordered_set<uint32_t>* ApplyLightingQueue = nullptr;
+        mutable std::mutex ApplyLightingQueueMutex;
 
-        void InitializeAndAddChunk(unsigned int X, unsigned int Z) const;
+        void ApplyLightingVoxel(int32_t LightOrigin[3], int32_t LightProducingLevel, bool AutoUpdateChunks) const;
+
+        void InitializeAndAddChunk(uint32_t X, uint32_t Z) const;
 
         inline void ApplyLightingChunk(SnazzCraft::Chunk* Chunk) const
         {
             for (auto& VoxelPair : *Chunk->Voxels) {
                 if (VoxelPair.second.LightProducingLevel <= 0) continue;
 
-                int Position[3] = {
-                    static_cast<int>(VoxelPair.second.Position[0]) + Chunk->Position[0] * SnazzCraft::Chunk::Width,
-                    static_cast<int>(VoxelPair.second.Position[1]),
-                    static_cast<int>(VoxelPair.second.Position[2]) + Chunk->Position[1] * SnazzCraft::Chunk::Depth,
+                int32_t Position[3] = {
+                    static_cast<int32_t>(VoxelPair.second.Position[0]) + Chunk->Position[0] * SnazzCraft::Chunk::Width,
+                    static_cast<int32_t>(VoxelPair.second.Position[1]),
+                    static_cast<int32_t>(VoxelPair.second.Position[2]) + Chunk->Position[1] * SnazzCraft::Chunk::Depth,
                 };
                 this->ApplyLightingVoxel(Position, VoxelPair.second.LightProducingLevel, false);
             }
         }
+
+        inline void UpdateChunkMeshesInQueue()
+        {
+            std::lock_guard<std::mutex> QueueLockGuard(this->ChunkMeshUpdateQueueMutex);
+            std::lock_guard<std::mutex> ChunkLockGuard(this->ChunkMutex);
+            for (SnazzCraft::Chunk* Chunk : *this->ChunkMeshUpdateQueue) {
+                Chunk->UpdateMesh();
+            }
+            this->ChunkMeshUpdateQueue->clear();
+        }
+
+        inline void UpdateLightingInQueue()
+        {
+            
+        }
         
     public:
-        static SnazzCraft::World* CreateWorld(std::string Name, unsigned int* Size, int Seed);
+        static SnazzCraft::World* CreateWorld(std::string Name, uint32_t Size, int32_t Seed);
 
         static SnazzCraft::World* LoadWorldFromSaveFile(std::string FilePath);
     };
-
     
     extern SnazzCraft::World* CurrentWorld;
 }

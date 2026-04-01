@@ -115,17 +115,17 @@ bool SnazzCraft::Initiate()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    glfwSetMouseButtonCallback(SnazzCraft::Window, &MouseButtonCallback);
+    glfwSetMouseButtonCallback(SnazzCraft::Window, MouseButtonCallback);
     
     SnazzCraft::VoxelMesh = new Mesh(VoxelMeshVertices, VoxelMeshIndices);
 
     SnazzCraft::VoxelMesh->ScaleVector = { (float)(SnazzCraft::Voxel::Size) / 2, (float)(SnazzCraft::Voxel::Size) / 2, (float)(SnazzCraft::Voxel::Size) / 2 };
 
     SnazzCraft::MenuGUI = new SnazzCraft::MainMenuGUI(900, 900, SnazzCraft::Window);
-    SnazzCraft::MenuGUI->GUIInputHandler->Callback = &MainMenuCallback;
+    SnazzCraft::MenuGUI->GUIInputHandler->Callback = MainMenuCallback;
 
     SnazzCraft::WorldGUI = new SnazzCraft::InWorldGUI(900, 900, SnazzCraft::Window);
-    SnazzCraft::WorldGUI->GUIInputHandler->Callback = &WorldInputCallback;
+    SnazzCraft::WorldGUI->GUIInputHandler->Callback = WorldInputCallback;
 
     return true;
 }

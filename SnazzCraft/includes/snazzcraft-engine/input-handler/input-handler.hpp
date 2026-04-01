@@ -15,7 +15,7 @@ namespace SnazzCraft
     {
     public:
         std::vector<SnazzCraft::Event*> EventQueue;
-        void (*Callback)(SnazzCraft::Event*) = nullptr;
+        void(*Callback)(SnazzCraft::Event*) = nullptr;
 
         InputHandler(GLFWwindow* Window);
 

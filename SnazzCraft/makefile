@@ -1,9 +1,9 @@
 CPPC = g++
 CC = gcc
 INCLUDES = includes
-CPPFLAGS = -I$(INCLUDES) -Werror
+CPPFLAGS = -I$(INCLUDES) -Werror -std=c++23
 CFLAGS = -I$(INCLUDES)
-LDFLAGS = -lglfw -ldl -lGL -lnoise -lm -std=c++23
+LDFLAGS = -lglfw -ldl -lGL -lnoise -lm
 
 # 1. Automatically find all .cpp and .c files recursively
 # This finds every file in src/ and includes/ without you listing them
@@ -18,6 +18,7 @@ all: bin/executable
 
 # Linking: $^ represents all the object files listed in $(OBJS)
 bin/executable: $(OBJS)
+	mkdir -p bin
 	$(CPPC) $^ -o $@ $(LDFLAGS)
 
 # Rule for C++: Creates the subfolder in 'build' before compiling
@@ -31,6 +32,6 @@ build/%.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -rf build bin/executable
+	rm -rf build bin
 
 .PHONY: all clean
