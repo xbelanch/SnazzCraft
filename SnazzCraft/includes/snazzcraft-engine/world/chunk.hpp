@@ -18,7 +18,7 @@
 
 namespace SnazzCraft
 {
-    constexpr char VoxelCheckPositions[6][3] = {
+    constexpr int8_t VoxelCheckPositions[6][3] = {
         {  0,  0, -1 }, // Front
         { -1,  0,  0 }, // Left
         {  1,  0,  0 }, // Right
@@ -30,8 +30,6 @@ namespace SnazzCraft
     class Chunk
     {
     public:
-        
-
         int32_t Position[2]; // X & Z Chunk Coordinates
 
         SnazzCraft::Mesh* ChunkMesh = nullptr;
@@ -58,6 +56,25 @@ namespace SnazzCraft
         SnazzCraft::Voxel* GetCollidingVoxel(const glm::vec3& Position) const;
 
         SnazzCraft::Voxel* GetCollidingVoxel(const SnazzCraft::Hitbox* Hitbox, int32_t LocalVoxelX, int32_t LocalVoxelY, int32_t LocalVoxelZ) const;
+
+        inline void UpdateLightingOnVertices()
+        {
+            constexpr float DefaultLightValue = 1.0f / MAX_VOXEL_LIGHT_VALUE;
+
+            uint32_t VoxelCount = 0;
+            for (const auto& [Key, OptimizedVoxel] : *this->OptimizedVoxels) {
+                uint32_t VerticeIndex = VoxelCount * 24; // 24 vertices per voxel
+
+                auto LightValueIterator = this->LightValues->find(SnazzCraft::Chunk::LocalVoxelIndex(OptimizedVoxel));
+                float LightValue = LightValueIterator != this->LightValues->end() ? static_cast<float>(LightValueIterator->second) / MAX_VOXEL_LIGHT_VALUE : DefaultLightValue;
+
+                for (uint32_t L = VerticeIndex; L < VerticeIndex + 24; L++) {
+                    (*this->Vertices)[L].Brightness = LightValue;
+                }
+
+                VoxelCount++;
+            }
+        }
 
         inline void UpdateMesh()
         {

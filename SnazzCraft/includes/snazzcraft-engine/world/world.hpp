@@ -127,7 +127,7 @@ namespace SnazzCraft
                 auto ChunkIterator = this->Chunks->find(I);
                 if (ChunkIterator == this->Chunks->end()) continue;
 
-                ChunkIterator->second->UpdateVerticesAndIndices();
+                ChunkIterator->second->UpdateLightingOnVertices();
                 ChunkIterator->second->UpdateMesh();
             }
         }

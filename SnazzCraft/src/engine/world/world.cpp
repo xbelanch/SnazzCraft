@@ -32,13 +32,12 @@ void SnazzCraft::World::GenerateChunk(uint32_t X, uint32_t Z, bool ApplyLighting
     
     SnazzCraft::Chunk* NewChunk = new SnazzCraft::Chunk(X, Z);
 
-    std::cout << "GENERATING CHUNK AT POSITION| " << X << " | " << Z << "\n";
     NewChunk->Generate(this->WorldHeightMap, this->Size * SnazzCraft::Chunk::Width);
     NewChunk->CullVoxelFaces();
     NewChunk->UpdateVerticesAndIndices();   
 
     (*this->Chunks)[ChunkIndex] = NewChunk;
-    if (ApplyLighting) { this->UpdateChunkLighting(NewChunk); std::cout << "APPLYING LIGHTING TO CHUNK AT POSITION| " << X << " | " << Z << "\n"; }
+    if (ApplyLighting) this->UpdateChunkLighting(NewChunk); 
     NewChunk->UpdateMesh();
 }
 

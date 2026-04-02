@@ -61,18 +61,7 @@ void SnazzCraft::Chunk::Generate(SnazzCraft::HeightMap* HeightMap, uint32_t MapW
 
 void SnazzCraft::Chunk::UpdateVerticesAndIndices()
 {
-    auto ApplyLightingToVertices = [this](const SnazzCraft::Voxel& Voxel, std::vector<SnazzCraft::Vertice3D>& Vertices) -> void
-    {
-        int LightValue = 1;
-        auto LightValueIterator = this->LightValues->find(SnazzCraft::Chunk::LocalVoxelIndex(Voxel));
-        if (LightValueIterator != this->LightValues->end()) LightValue = LightValueIterator->second;
-        LightValue = LightValue < Voxel.LightProducingLevel ? Voxel.LightProducingLevel : LightValue;
 
-        float LightValueToApply = static_cast<float>(LightValue) / MAX_VOXEL_LIGHT_VALUE;
-        for (SnazzCraft::Vertice3D& Vertice : Vertices) {
-            Vertice.Brightness = LightValueToApply;
-        }
-    };
 
     this->Vertices->clear();
     this->Indices->clear();
@@ -81,10 +70,7 @@ void SnazzCraft::Chunk::UpdateVerticesAndIndices()
         const glm::vec3 Offset = glm::vec3((float)VoxelPair.second.Position[0], (float)VoxelPair.second.Position[1], (float)VoxelPair.second.Position[2]) * glm::vec3((float)SnazzCraft::Voxel::Size, (float)SnazzCraft::Voxel::Size, (float)SnazzCraft::Voxel::Size) + this->ChunkWorldOffset; 
         uint32_t NewVerticesCount = 0;
 
-        std::vector<SnazzCraft::Vertice3D> Vertices = SnazzCraft::EngineVoxelTextureApplier->GetTexturedVertices(VoxelPair.second);
-        ApplyLightingToVertices(VoxelPair.second, Vertices);
-
-        for (SnazzCraft::Vertice3D& Vertice3D : Vertices) { 
+        for (SnazzCraft::Vertice3D& Vertice3D : SnazzCraft::EngineVoxelTextureApplier->GetTexturedVertices(VoxelPair.second)) { 
             Vertice3D.Position += Offset; // Adjusting to world space once now means not having to create a new model matrix for each individual chunk later
 
             this->Vertices->push_back(Vertice3D);
