@@ -161,14 +161,15 @@ void SnazzCraft::World::UpdateChunkLighting(SnazzCraft::Chunk* Chunk)
 {
     std::unordered_set<uint32_t> ChunksToUpdate;
     for (const auto& VoxelPair : Chunk->OptimizedVoxels) {
-        if (VoxelPair.second.LightProducingLevel <= 0) continue;
+        int32_t LightProducingLevel = VoxelPair.second.GetVoxelType().LightProducingLevel;
+        if (LightProducingLevel <= 0) continue;
 
         int32_t Position[3] = {
             static_cast<int32_t>(VoxelPair.second.X) + Chunk->Position[0] * SnazzCraft::Chunk::Width,
             static_cast<int32_t>(VoxelPair.second.Y),
             static_cast<int32_t>(VoxelPair.second.Z) + Chunk->Position[1] * SnazzCraft::Chunk::Depth,
         };
-        this->ApplyLightingVoxel(Position, VoxelPair.second.LightProducingLevel, ChunksToUpdate);
+        this->ApplyLightingVoxel(Position, LightProducingLevel, ChunksToUpdate);
     }
     
     for (uint32_t I : ChunksToUpdate) {
@@ -245,7 +246,7 @@ void SnazzCraft::World::ApplyLightingVoxel(int32_t LightOrigin[3], int32_t Light
             SnazzCraft::Chunk::GetLocalVoxelPosition(CurrentNode.X, CurrentNode.Y, CurrentNode.Z, LocalVoxelPosition);
             auto VoxelIterator = ChunkIterator->second->OptimizedVoxels.find(SnazzCraft::Chunk::LocalVoxelIndex(LocalVoxelPosition[0], LocalVoxelPosition[1], LocalVoxelPosition[2]));
             bool VoxelAtPosition = VoxelIterator != ChunkIterator->second->OptimizedVoxels.end();
-            int LightPropogationDecrease = VoxelAtPosition ? VoxelIterator->second.LightPropogationDecrease : 1;
+            int LightPropogationDecrease = VoxelAtPosition ? VoxelIterator->second.GetVoxelType().LightPropogationDecrease: 1;
 
             AddLightNodes(Queue, CurrentNode, LightPropogationDecrease);
         }
@@ -366,9 +367,7 @@ SnazzCraft::World* SnazzCraft::World::LoadWorldFromSaveFile(std::string FilePath
                 SnazzCraft::ParseData(NewInfo, Data, DataIndex, &EmptyChar); 
                 NewVoxelInfo[3] = static_cast<uint32_t >(stoul(NewInfo));
 
-                SnazzCraft::Voxel NewVoxel(NewVoxelInfo[0], NewVoxelInfo[1], NewVoxelInfo[2], NewVoxelInfo[3]);
-                NewVoxel.AutoSetSpecificValues();
-
+                SnazzCraft::Voxel NewVoxel(NewVoxelInfo[0], NewVoxelInfo[1], NewVoxelInfo[2], NewVoxelInfo[3]);\
                 VoxelsToAddToChunks.back().push_back(NewVoxel);
 
                 break;

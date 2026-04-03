@@ -38,15 +38,12 @@ void SnazzCraft::Chunk::Generate(SnazzCraft::HeightMap* HeightMap, uint32_t MapW
             else if (HeightAtPositionIterator->second != 0 && Y >= HeightAtPositionIterator->second - 4) NewVoxelID = ID_VOXEL_DIRT;
 
             SnazzCraft::Voxel NewVoxel(X, Y, Z, NewVoxelID);
-            NewVoxel.AutoSetSpecificValues();
-
             this->Voxels.insert({ SnazzCraft::Chunk::LocalVoxelIndex(X, Y, Z), NewVoxel });
         }
 
         // Testing Torches
         if (X != 5 || Z != 5) continue;
         SnazzCraft::Voxel NewVoxel = SnazzCraft::Voxel(X, HeightAtPositionIterator->second, Z, ID_VOXEL_TORCH);
-        NewVoxel.AutoSetSpecificValues();
 
         this->Voxels.insert({ SnazzCraft::Chunk::LocalVoxelIndex(X, HeightAtPositionIterator->second, Z), NewVoxel });
     }
@@ -55,8 +52,6 @@ void SnazzCraft::Chunk::Generate(SnazzCraft::HeightMap* HeightMap, uint32_t MapW
 
 void SnazzCraft::Chunk::UpdateVerticesAndIndices()
 {
-
-
     this->Vertices.clear();
     this->Indices.clear();
 
@@ -86,7 +81,7 @@ void SnazzCraft::Chunk::CullVoxelFaces()
     this->OptimizedVoxels.clear();
 
     for (auto VoxelPair : this->Voxels)  {
-        if (!VoxelPair.second.Cullable) { this->OptimizedVoxels.insert({ VoxelPair.first, VoxelPair.second }); continue; }
+        if (!VoxelPair.second.GetVoxelType().Cullable) { this->OptimizedVoxels.insert({ VoxelPair.first, VoxelPair.second }); continue; }
 
         for (int32_t I = 5; I >= 0; I--) {
             int32_t CheckPosition[3] = {
@@ -100,7 +95,7 @@ void SnazzCraft::Chunk::CullVoxelFaces()
             auto CurrentIterator = this->Voxels.find(SnazzCraft::Chunk::LocalVoxelIndex(CheckPosition[0], CheckPosition[1], CheckPosition[2]));
             if (CurrentIterator == this->Voxels.end()) continue;
 
-            if (!CurrentIterator->second.Cullable) continue;
+            if (!CurrentIterator->second.GetVoxelType().Cullable) continue;
       
             VoxelPair.second.ChangeSideValue(I, false);
         }
@@ -163,7 +158,7 @@ SnazzCraft::Voxel* SnazzCraft::Chunk::GetCollidingVoxel(const glm::vec3& Positio
     auto VoxelIterator = this->Voxels.find(SnazzCraft::Chunk::LocalVoxelIndex(VPosition[0], VPosition[1], VPosition[2]));
     if (VoxelIterator == this->Voxels.end()) return nullptr;
 
-    if (!VoxelIterator->second.CollidableToEntities) return nullptr;
+    if (!VoxelIterator->second.GetVoxelType().CollidableToEntities) return nullptr;
 
     this->VoxelCollisionHitbox->Position = this->LocalVoxelPositionToWorldPosition(VPosition[0], VPosition[1], VPosition[2]); 
     if (this->VoxelCollisionHitbox->IsColliding(CheckPosition)) return &VoxelIterator->second;
@@ -178,7 +173,7 @@ SnazzCraft::Voxel* SnazzCraft::Chunk::GetCollidingVoxel(const SnazzCraft::Hitbox
     auto VoxelIterator = this->Voxels.find(SnazzCraft::Chunk::LocalVoxelIndex(LocalVoxelX, LocalVoxelY, LocalVoxelZ));
     if (VoxelIterator == this->Voxels.end()) return nullptr;
 
-    if (!VoxelIterator->second.CollidableToEntities) return nullptr;
+    if (!VoxelIterator->second.GetVoxelType().CollidableToEntities) return nullptr;
 
     this->VoxelCollisionHitbox->Position = this->LocalVoxelPositionToWorldPosition(LocalVoxelX, LocalVoxelY, LocalVoxelZ); 
     if (!this->VoxelCollisionHitbox->IsColliding(*Hitbox)) return nullptr;
@@ -188,14 +183,14 @@ SnazzCraft::Voxel* SnazzCraft::Chunk::GetCollidingVoxel(const SnazzCraft::Hitbox
 
 void SnazzCraft::Chunk::UpdateLightingOnVertices()
 {
-    constexpr float DefaultLightValue = 1.0f / MAX_VOXEL_LIGHT_VALUE;
+    constexpr float DefaultLightValue = 1.0f / SnazzCraft::Voxel::MaxLightValue;
 
     uint32_t VoxelCount = 0;
     for (const auto& [Key, OptimizedVoxel] : this->OptimizedVoxels) {
         uint32_t VerticeIndex = VoxelCount * 24; // 24 vertices per voxel
 
         auto LightValueIterator = this->LightValues.find(SnazzCraft::Chunk::LocalVoxelIndex(OptimizedVoxel));
-        float LightValue = LightValueIterator != this->LightValues.end() ? static_cast<float>(LightValueIterator->second) / MAX_VOXEL_LIGHT_VALUE : DefaultLightValue;
+        float LightValue = LightValueIterator != this->LightValues.end() ? static_cast<float>(LightValueIterator->second) / SnazzCraft::Voxel::MaxLightValue : DefaultLightValue;
 
         for (uint32_t L = VerticeIndex; L < VerticeIndex + 24; L++) {
             this->Vertices[L].Brightness = LightValue;

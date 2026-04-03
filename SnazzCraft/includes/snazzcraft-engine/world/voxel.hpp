@@ -5,66 +5,31 @@
 
 #include "glm/glm.hpp"
 #include "snazzcraft-engine/world/voxel-ids.h"
-
-#define MAX_VOXEL_LIGHT_VALUE (20)
+#include "snazzcraft-engine/world/voxel-type.hpp"
 
 namespace SnazzCraft
 {
+    class VoxelType;
+
     class Voxel
     {
     public:
         static constexpr uint32_t Size = 2;
+        static constexpr int32_t MaxLightValue = 20;
 
         union 
         {
             struct 
             {
-                uint32_t X, Y, Z;
+                uint8_t X, Y, Z;
             };
-            uint32_t Position[3]; // In local chunk space
+            uint8_t Position[3]; // In local chunk space
         };
         uint32_t ID;
 
-        // Specific values ->
-        int LightProducingLevel = 0;
-        int LightPropogationDecrease = MAX_VOXEL_LIGHT_VALUE;
-        bool Cullable = true;
-        bool CollidableToEntities = true;
-        bool CollidableToVoxels = true;
-        // <-
+        Voxel(uint8_t IX, uint8_t IY, uint8_t IZ, uint32_t IID);
 
-        Voxel(uint32_t IX, uint32_t IY, uint32_t IZ, uint32_t IID);
-
-        inline void AutoSetSpecificValues()
-        {
-            switch (this->ID)
-            {
-                case ID_VOXEL_ABOVE_GRASS:
-                    this->LightProducingLevel = 0;
-                    this->LightPropogationDecrease = 0;
-
-                    this->Cullable = false;
-                    this->CollidableToEntities = false;
-                    this->CollidableToVoxels = true;
-                    break;
-
-                case ID_VOXEL_TORCH:
-                    this->LightProducingLevel = 18;
-                    this->LightPropogationDecrease = 0;
-                    this->Cullable = false;
-                    this->CollidableToEntities = false;
-                    this->CollidableToVoxels = true;
-                    break;
-
-                default:
-                    this->LightProducingLevel = 0;
-                    this->LightPropogationDecrease = MAX_VOXEL_LIGHT_VALUE;
-                    this->Cullable = true;
-                    this->CollidableToEntities = true;
-                    this->CollidableToVoxels = true;
-                    break;
-            }
-        }
+        const SnazzCraft::VoxelType& GetVoxelType() const;
 
         inline bool HasSide(uint8_t SideIndex) const
         {
@@ -106,6 +71,8 @@ namespace SnazzCraft
         // Bit Order:
         // false, false, Bottom, Top, Back, Right, Left, Front
         uint8_t Sides = 0x3F;
+
+
 
     };
 } // SnazzCraft
