@@ -163,7 +163,7 @@ SnazzCraft::Voxel* SnazzCraft::Chunk::GetCollidingVoxel(const glm::vec3& Positio
     auto VoxelIterator = this->Voxels.find(SnazzCraft::Chunk::LocalVoxelIndex(VPosition[0], VPosition[1], VPosition[2]));
     if (VoxelIterator == this->Voxels.end()) return nullptr;
 
-    if (!VoxelIterator->second.Collidable) return nullptr;
+    if (!VoxelIterator->second.CollidableToEntities) return nullptr;
 
     this->VoxelCollisionHitbox->Position = this->LocalVoxelPositionToWorldPosition(VPosition[0], VPosition[1], VPosition[2]); 
     if (this->VoxelCollisionHitbox->IsColliding(CheckPosition)) return &VoxelIterator->second;
@@ -178,7 +178,7 @@ SnazzCraft::Voxel* SnazzCraft::Chunk::GetCollidingVoxel(const SnazzCraft::Hitbox
     auto VoxelIterator = this->Voxels.find(SnazzCraft::Chunk::LocalVoxelIndex(LocalVoxelX, LocalVoxelY, LocalVoxelZ));
     if (VoxelIterator == this->Voxels.end()) return nullptr;
 
-    if (!VoxelIterator->second.Collidable) return nullptr;
+    if (!VoxelIterator->second.CollidableToEntities) return nullptr;
 
     this->VoxelCollisionHitbox->Position = this->LocalVoxelPositionToWorldPosition(LocalVoxelX, LocalVoxelY, LocalVoxelZ); 
     if (!this->VoxelCollisionHitbox->IsColliding(*Hitbox)) return nullptr;

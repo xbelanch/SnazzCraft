@@ -17,42 +17,39 @@ namespace SnazzCraft
 
         uint32_t Position[3]; // In local chunk space
         uint32_t ID;
+
+        // Specific values ->
         int LightProducingLevel = 0;
         bool Cullable = true;
-        bool Collidable = true;
+        bool CollidableToEntities = true;
+        bool CollidableToVoxels = true;
+        // <-
 
         bool Sides[6] = { true, true, true, true, true, true }; // Front, Left, Right, Back, Top, Bottom
 
         Voxel(uint32_t X, uint32_t Y, uint32_t Z, uint32_t ID);
 
-        Voxel(uint32_t X, uint32_t Y, uint32_t Z, uint32_t ID, bool Cullable);
-
-        Voxel(uint32_t X, uint32_t Y, uint32_t Z, uint32_t ID, bool Cullable, bool Collidable);
-
-        /*
-        Specific values include the following members:
-            LightProducingLevel
-            Cullable
-            Collidable
-        */
         inline void AutoSetSpecificValues()
         {
             switch (this->ID)
             {
                 case ID_VOXEL_ABOVE_GRASS:
                     this->Cullable = false;
-                    this->Collidable = false;
+                    this->CollidableToEntities = false;
+                    this->CollidableToVoxels = true;
                     break;
 
                 case ID_VOXEL_TORCH:
+                this->LightProducingLevel = 18;
                     this->Cullable = false;
-                    this->Collidable = false;
-                    this->LightProducingLevel = 18;
+                    this->CollidableToEntities = false;
+                    this->CollidableToVoxels = true;
                     break;
 
                 default:
                     this->Cullable = true;
-                    this->Cullable = true;
+                    this->CollidableToEntities = true;
+                    this->CollidableToVoxels = true;
             }
         }
 

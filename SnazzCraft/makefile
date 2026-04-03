@@ -3,8 +3,8 @@ CC = gcc
 INCLUDES = includes
 
 CPPFLAGS = -I$(INCLUDES) -Werror -Wall -std=c++23 -MMD -MP
-CFLAGS = -I$(INCLUDES) -Werror -Wall -MMD -MP
-LDFLAGS = -lglfw -ldl -lGL -lnoise -lm
+CFLAGS = -I$(INCLUDES) -Werror -Wall -MMD -MP 
+LDFLAGS = -lglfw -ldl -lGL -lnoise -lm 
 
 CPP_SOURCES := $(shell find src -name '*.cpp')
 C_SOURCES := $(shell find src -name '*.c')
