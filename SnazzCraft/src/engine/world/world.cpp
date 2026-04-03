@@ -2,33 +2,28 @@
 
 SnazzCraft::World* SnazzCraft::CurrentWorld = nullptr;
 
-SnazzCraft::World::World(std::string Name, uint32_t Size, int Seed)
+SnazzCraft::World::World(std::string IName, uint32_t ISize, int32_t ISeed)
+    : Name(IName), Size(ISize), Seed(ISeed), Chunks(std::unordered_map<uint32_t, SnazzCraft::Chunk*>())
 {
-    this->Size = Size;
-    this->Name = Name;
-    this->Seed = Seed;
-
-    this->Chunks = new std::unordered_map<uint32_t, SnazzCraft::Chunk*>();
-    this->WorldHeightMap = new SnazzCraft::HeightMap(this->Size * SnazzCraft::Chunk::Width, 0, SnazzCraft:: Chunk::Height - 1, this->Seed, 1.0, 0.5, 2.0, 6);
+    this->WorldHeightMap = new SnazzCraft::HeightMap(this->Size * SnazzCraft::Chunk::Width, 0, SnazzCraft::Chunk::Height - 1, this->Seed, 1.0, 0.5, 2.0, 6);
 }
 
 SnazzCraft::World::~World()
 {
-    for (auto& ChunkPair : *this->Chunks) {
+    for (auto& ChunkPair : this->Chunks) {
         delete ChunkPair.second;
     }
 
-    delete this->Chunks;
     delete this->WorldHeightMap;
 }
 
-void SnazzCraft::World::GenerateChunk(uint32_t X, uint32_t Z, bool ApplyLighting) const
+void SnazzCraft::World::GenerateChunk(uint32_t X, uint32_t Z, bool ApplyLighting)
 {
     if (X >= SnazzCraft::World::Size || Z >= SnazzCraft::World::Size) return;
 
     uint32_t ChunkIndex = INDEX_2D(X, Z, this->Size);
-    auto Iterator = this->Chunks->find(ChunkIndex);
-    if (Iterator != this->Chunks->end()) return;
+    auto Iterator = this->Chunks.find(ChunkIndex);
+    if (Iterator != this->Chunks.end()) return;
     
     SnazzCraft::Chunk* NewChunk = new SnazzCraft::Chunk(X, Z);
 
@@ -36,7 +31,7 @@ void SnazzCraft::World::GenerateChunk(uint32_t X, uint32_t Z, bool ApplyLighting
     NewChunk->CullVoxelFaces();
     NewChunk->UpdateVerticesAndIndices();   
 
-    (*this->Chunks)[ChunkIndex] = NewChunk;
+    this->Chunks[ChunkIndex] = NewChunk;
     if (ApplyLighting) this->UpdateChunkLighting(NewChunk); 
     NewChunk->UpdateMesh();
 }
@@ -50,8 +45,8 @@ void SnazzCraft::World::RenderChunks(SnazzCraft::User* Player)
     for (int32_t Z = PlayerChunkPosition[1] - static_cast<int32_t>(this->RenderDistance); Z <= PlayerChunkPosition[1] + static_cast<int32_t>(this->RenderDistance); Z++) {
         if (X < 0 || X >= static_cast<int32_t>(this->Size) || Z < 0 || Z >= static_cast<int32_t>(this->Size)) continue;
 
-        auto ChunkIterator = this->Chunks->find(INDEX_2D(X, Z, static_cast<int32_t>(this->Size)));
-        if (ChunkIterator == this->Chunks->end()) continue;
+        auto ChunkIterator = this->Chunks.find(INDEX_2D(X, Z, static_cast<int32_t>(this->Size)));
+        if (ChunkIterator == this->Chunks.end()) continue;
 
         if (ChunkIterator->second->ChunkMesh == nullptr) continue; 
         ChunkIterator->second->ChunkMesh->Draw();
@@ -68,8 +63,8 @@ SnazzCraft::Voxel* SnazzCraft::World::GetCollidingVoxel(const SnazzCraft::Hitbox
     for (int32_t Z = ChunkZ - 1; Z <= ChunkZ + 1; Z++) {
         if (X < 0 || Z < 0 || X >= static_cast<int32_t>(this->Size) || Z >= static_cast<int32_t>(this->Size)) continue;
         
-        auto ChunkIterator = this->Chunks->find(INDEX_2D(X, Z, this->Size));
-        if (ChunkIterator == this->Chunks->end()) continue;
+        auto ChunkIterator = this->Chunks.find(INDEX_2D(X, Z, this->Size));
+        if (ChunkIterator == this->Chunks.end()) continue;
 
         SnazzCraft::Voxel* CollisionVoxel = ChunkIterator->second->GetCollidingVoxel(Hitbox);
         if (CollisionVoxel != nullptr) return CollisionVoxel;
@@ -86,8 +81,8 @@ SnazzCraft::Voxel* SnazzCraft::World::GetCollidingVoxel(const glm::vec3& Positio
 
     if (ChunkX < 0 || ChunkZ < 0 || ChunkX >= static_cast<int32_t>(this->Size) || ChunkZ >= static_cast<int32_t>(this->Size)) return nullptr;
 
-    auto ChunkIterator = this->Chunks->find(INDEX_2D(ChunkX, ChunkZ, this->Size));
-    if (ChunkIterator == this->Chunks->end()) return nullptr;
+    auto ChunkIterator = this->Chunks.find(INDEX_2D(ChunkX, ChunkZ, this->Size));
+    if (ChunkIterator == this->Chunks.end()) return nullptr;
 
     SnazzCraft::Voxel* CollisionVoxel = ChunkIterator->second->GetCollidingVoxel(Position);
     if (CollisionVoxel != nullptr) return CollisionVoxel;
@@ -146,7 +141,7 @@ bool SnazzCraft::World::SaveWorldToFile(bool OverwriteExistingFile)
     File << WORLD_SAVE_FILE_DESCRIPTOR_SIZE       << ": " << this->Size << "\n";
     File << WORLD_SAVE_FILE_DESCRIPTOR_WORLD_SEED << ": " << this->Seed << "\n";
 
-    for (auto& ChunkPair : *this->Chunks) {
+    for (auto& ChunkPair : this->Chunks) {
         SnazzCraft::Chunk* Chunk = ChunkPair.second;
 
         File << WORLD_SAVE_FILE_DESCRIPTOR_CHUNK_BEGIN << ": " << Chunk->Position[0] << " " << Chunk->Position[1] << "\n";
@@ -163,7 +158,7 @@ bool SnazzCraft::World::SaveWorldToFile(bool OverwriteExistingFile)
 }
 
 
-void SnazzCraft::World::ApplyLightingVoxel(int32_t LightOrigin[3], int32_t LightProducingLevel, std::unordered_set<uint32_t>& ChunksToUpdate) const
+void SnazzCraft::World::ApplyLightingVoxel(int32_t LightOrigin[3], int32_t LightProducingLevel, std::unordered_set<uint32_t>& ChunksToUpdate)
 {
     auto IsOutsideWorld = [this](int32_t X, int32_t Y, int32_t Z) -> bool
     {
@@ -205,13 +200,13 @@ void SnazzCraft::World::ApplyLightingVoxel(int32_t LightOrigin[3], int32_t Light
 
         int32_t ChunkCoordinates[2];
         SnazzCraft::Chunk::GetChunkPosition(CurrentNode.X, CurrentNode.Z, ChunkCoordinates);
-        auto ChunkIterator = this->Chunks->find(INDEX_2D(ChunkCoordinates[0], ChunkCoordinates[1], this->Size));
+        auto ChunkIterator = this->Chunks.find(INDEX_2D(ChunkCoordinates[0], ChunkCoordinates[1], this->Size));
         
-        if (ChunkIterator == this->Chunks->end()) {
+        if (ChunkIterator == this->Chunks.end()) {
             this->GenerateChunk(ChunkCoordinates[0], ChunkCoordinates[1], true);
-            ChunkIterator = this->Chunks->find(INDEX_2D(ChunkCoordinates[0], ChunkCoordinates[1], this->Size));
+            ChunkIterator = this->Chunks.find(INDEX_2D(ChunkCoordinates[0], ChunkCoordinates[1], this->Size));
         }
-        if (ChunkIterator == this->Chunks->end()) continue;
+        if (ChunkIterator == this->Chunks.end()) continue;
 
         int32_t Local[3];
         SnazzCraft::Chunk::GetLocalVoxelPosition(CurrentNode.X, CurrentNode.Y, CurrentNode.Z, Local);
@@ -361,7 +356,7 @@ SnazzCraft::World* SnazzCraft::World::LoadWorldFromSaveFile(std::string FilePath
     SnazzCraft::World* NewWorld = new SnazzCraft::World(NewWorldName, NewWorldSize, NewWorldSeed);
 
     for (SnazzCraft::Chunk* ChunkPointer : NewWorldChunks) {
-        NewWorld->Chunks->insert({ INDEX_2D(ChunkPointer->Position[0], ChunkPointer->Position[1], NewWorld->Size), ChunkPointer });
+        NewWorld->Chunks.insert({ INDEX_2D(ChunkPointer->Position[0], ChunkPointer->Position[1], NewWorld->Size), ChunkPointer });
     }
 
     File.close();

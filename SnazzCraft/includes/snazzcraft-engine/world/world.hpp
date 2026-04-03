@@ -42,11 +42,11 @@ namespace SnazzCraft
         
         uint32_t RenderDistance = 50;
 
-        World(std::string Name, uint32_t Size, int32_t Seed);
+        World(std::string IName, uint32_t ISize, int32_t ISeed);
 
         ~World();
 
-        void GenerateChunk(uint32_t X, uint32_t Z, bool ApplyLighting) const; // Thread safe
+        void GenerateChunk(uint32_t X, uint32_t Z, bool ApplyLighting); // Thread safe
 
         void RenderChunks(SnazzCraft::User* Player); // Thread safe
 
@@ -64,7 +64,7 @@ namespace SnazzCraft
         {
             constexpr float MoveDistance = 0.2f;
 
-            for (auto& ChunkPair : *this->Chunks) {
+            for (auto& ChunkPair : this->Chunks) {
                 for (SnazzCraft::Entity* Entity : ChunkPair.second->Entities) {
                     this->MoveEntity(glm::vec3(0.0f, -MoveDistance, 0.0f), Entity);
                 }
@@ -93,7 +93,7 @@ namespace SnazzCraft
             LightNode(int32_t ILightValue, int32_t IPosition[3]);
         };
 
-        std::unordered_map<uint32_t, SnazzCraft::Chunk*>* Chunks = nullptr;
+        std::unordered_map<uint32_t, SnazzCraft::Chunk*> Chunks;
 
         SnazzCraft::HeightMap* WorldHeightMap = nullptr;
         
@@ -102,14 +102,14 @@ namespace SnazzCraft
         Generates currently ungenerated Chunks when light values would affect them
         Not Thread safe
         */
-        void ApplyLightingVoxel(int32_t LightOrigin[3], int32_t LightProducingLevel, std::unordered_set<uint32_t>& ChunksToUpdate) const; 
+        void ApplyLightingVoxel(int32_t LightOrigin[3], int32_t LightProducingLevel, std::unordered_set<uint32_t>& ChunksToUpdate);
 
         /*
         Calls UpdateVerticesAndIndices & UpdateMesh on all chunks affected
         If the Chunk in the address given has not light producing voxels then no updating member functions of the Chunk will be called
         Not thread safe
         */
-        inline void UpdateChunkLighting(SnazzCraft::Chunk* Chunk) const
+        inline void UpdateChunkLighting(SnazzCraft::Chunk* Chunk) 
         {
             std::unordered_set<uint32_t> ChunksToUpdate;
             for (const auto& VoxelPair : Chunk->OptimizedVoxels) {
@@ -124,8 +124,8 @@ namespace SnazzCraft
             }
 
             for (uint32_t I : ChunksToUpdate) {
-                auto ChunkIterator = this->Chunks->find(I);
-                if (ChunkIterator == this->Chunks->end()) continue;
+                auto ChunkIterator = this->Chunks.find(I);
+                if (ChunkIterator == this->Chunks.end()) continue;
 
                 ChunkIterator->second->UpdateLightingOnVertices();
                 ChunkIterator->second->UpdateMesh();
