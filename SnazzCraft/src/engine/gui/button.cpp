@@ -1,6 +1,6 @@
 #include "snazzcraft-engine/gui/button.hpp"
 
-SnazzCraft::Button::Button(unsigned int X, unsigned int Y, unsigned int Width, unsigned int Height)
+SnazzCraft::Button::Button(uint32_t X, uint32_t Y, uint32_t Width, uint32_t Height)
 {
     this->Position[0] = X;
     this->Position[1] = Y;
@@ -41,9 +41,9 @@ void SetWorldModeButtonCallback(SnazzCraft::Event* Event)
 
     SnazzCraft::World* NewWorld = SnazzCraft::CurrentWorld;
 
-    unsigned int NewWorldSize = 5;
     if (NewWorld == nullptr) { 
-        NewWorld = SnazzCraft::World::CreateWorld("default-generated-world", NewWorldSize, 58008);
+        NewWorld = SnazzCraft::World::CreateWorld("default-generated-world", 5, 58008);
+        //NewWorld = SnazzCraft::World::LoadWorldFromSaveFile("worlds/default-generated-world.txt");
     }
 
     Event->EventData->Items.push_back(static_cast<void*>(NewWorld));

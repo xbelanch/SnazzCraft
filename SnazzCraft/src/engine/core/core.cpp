@@ -137,8 +137,8 @@ void SnazzCraft::MainLoop()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
         SnazzCraft::GlobalFPSTracker->UpdateFPS();
-        system(CLEAR_COMMAND);
-        std::cout << "FPS| " << SnazzCraft::GlobalFPSTracker->FPS << "\n";
+        //system(CLEAR_COMMAND);
+        //std::cout << "FPS| " << SnazzCraft::GlobalFPSTracker->FPS << "\n";
 
         switch (SnazzCraft::UserMode)
         {

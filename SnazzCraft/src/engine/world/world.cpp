@@ -157,6 +157,29 @@ bool SnazzCraft::World::SaveWorldToFile(bool OverwriteExistingFile)
     return true;
 }
 
+void SnazzCraft::World::UpdateChunkLighting(SnazzCraft::Chunk* Chunk)
+{
+    std::unordered_set<uint32_t> ChunksToUpdate;
+    for (const auto& VoxelPair : Chunk->OptimizedVoxels) {
+        if (VoxelPair.second.LightProducingLevel <= 0) continue;
+
+        int32_t Position[3] = {
+            static_cast<int32_t>(VoxelPair.second.Position[0]) + Chunk->Position[0] * SnazzCraft::Chunk::Width,
+            static_cast<int32_t>(VoxelPair.second.Position[1]),
+            static_cast<int32_t>(VoxelPair.second.Position[2]) + Chunk->Position[1] * SnazzCraft::Chunk::Depth,
+        };
+        this->ApplyLightingVoxel(Position, VoxelPair.second.LightProducingLevel, ChunksToUpdate);
+    }
+    
+    for (uint32_t I : ChunksToUpdate) {
+        auto ChunkIterator = this->Chunks.find(I);
+        if (ChunkIterator == this->Chunks.end()) { continue; }
+
+        ChunkIterator->second->UpdateLightingOnVertices();
+        ChunkIterator->second->UpdateMesh();
+    }
+}
+
 
 void SnazzCraft::World::ApplyLightingVoxel(int32_t LightOrigin[3], int32_t LightProducingLevel, std::unordered_set<uint32_t>& ChunksToUpdate)
 {
@@ -251,17 +274,16 @@ SnazzCraft::World* SnazzCraft::World::LoadWorldFromSaveFile(std::string FilePath
     std::ifstream File(FilePath);
     if (!File.is_open()) return nullptr;
 
-    std::vector<SnazzCraft::Chunk*> NewWorldChunks;
     std::string NewWorldName;
     uint32_t NewWorldSize;
     int32_t NewWorldSeed;
 
     std::string Line;
 
-    SnazzCraft::Chunk* NewChunk;
-    char* EmptyChar = (char*)malloc(sizeof(char));
-    *EmptyChar = ' ';
+    std::vector<std::pair<int32_t, int32_t>> ChunkPositionsToAdd;
+    std::vector<std::vector<SnazzCraft::Voxel>> VoxelsToAddToChunks;
 
+    char EmptyChar = ' ';
     while (std::getline(File, Line))
     {
         if (Line.size() == 0) continue;
@@ -285,7 +307,7 @@ SnazzCraft::World* SnazzCraft::World::LoadWorldFromSaveFile(std::string FilePath
             {
                 std::string Size;
                 uint32_t DataIndex = 0;
-                SnazzCraft::ParseData(Size, Data, DataIndex, EmptyChar);
+                SnazzCraft::ParseData(Size, Data, DataIndex, &EmptyChar);
 
                 NewWorldSize = static_cast<uint32_t >(stoul(Size));
                 break;
@@ -295,7 +317,7 @@ SnazzCraft::World* SnazzCraft::World::LoadWorldFromSaveFile(std::string FilePath
             {
                 std::string Seed;
                 uint32_t DataIndex = 0;
-                SnazzCraft::ParseData(Seed, Data, DataIndex, EmptyChar);
+                SnazzCraft::ParseData(Seed, Data, DataIndex, &EmptyChar);
 
                 NewWorldSeed = stoi(Seed);
                 break;
@@ -307,26 +329,24 @@ SnazzCraft::World* SnazzCraft::World::LoadWorldFromSaveFile(std::string FilePath
                 int32_t NewCoordinates_Int[2];
                 uint32_t DataIndex = 0;
 
-                SnazzCraft::ParseData(NewCoordinate, Data, DataIndex, EmptyChar);
+                SnazzCraft::ParseData(NewCoordinate, Data, DataIndex, &EmptyChar);
 
                 NewCoordinates_Int[0] = stoi(NewCoordinate);
                 NewCoordinate.clear();
 
                 DataIndex++;
-                SnazzCraft::ParseData(NewCoordinate, Data, DataIndex, EmptyChar);
+                SnazzCraft::ParseData(NewCoordinate, Data, DataIndex, &EmptyChar);
                 NewCoordinates_Int[1] = stoi(NewCoordinate);
 
-                NewChunk = new SnazzCraft::Chunk(NewCoordinates_Int[0], NewCoordinates_Int[1]);
+                ChunkPositionsToAdd.push_back({ NewCoordinates_Int[0], NewCoordinates_Int[1] });
+
+                VoxelsToAddToChunks.emplace_back();
                 break;
             }
                 
 
             case WORLD_SAVE_FILE_DESCRIPTOR_CHUNK_END:
             {
-                NewChunk->CullVoxelFaces();
-                NewChunk->UpdateMesh();
-
-                NewWorldChunks.push_back(NewChunk);
                 break;
             }    
 
@@ -337,30 +357,47 @@ SnazzCraft::World* SnazzCraft::World::LoadWorldFromSaveFile(std::string FilePath
                 uint32_t NewVoxelInfo[4]; // X, Y, Z, ID
 
                 for (uint32_t I = 0; I < 3; I++) {
-                    SnazzCraft::ParseData(NewInfo, Data, DataIndex, EmptyChar);
+                    SnazzCraft::ParseData(NewInfo, Data, DataIndex, &EmptyChar);
                     NewVoxelInfo[I] = static_cast<uint32_t >(stoul(NewInfo));
                     NewInfo.clear();
                     DataIndex++;
                 }
 
-                SnazzCraft::ParseData(NewInfo, Data, DataIndex, EmptyChar); 
+                SnazzCraft::ParseData(NewInfo, Data, DataIndex, &EmptyChar); 
                 NewVoxelInfo[3] = static_cast<uint32_t >(stoul(NewInfo));
 
-                NewChunk->Voxels.insert({ SnazzCraft::Chunk::LocalVoxelIndex(NewVoxelInfo[0], NewVoxelInfo[1], NewVoxelInfo[2]), SnazzCraft::Voxel(NewVoxelInfo[0], NewVoxelInfo[1], NewVoxelInfo[2], NewVoxelInfo[3]) }); 
+                SnazzCraft::Voxel NewVoxel(NewVoxelInfo[0], NewVoxelInfo[1], NewVoxelInfo[2], NewVoxelInfo[3]);
+                NewVoxel.AutoSetSpecificValues();
+
+                VoxelsToAddToChunks.back().push_back(NewVoxel);
 
                 break;
             }
         }
     }
-
+    
     SnazzCraft::World* NewWorld = new SnazzCraft::World(NewWorldName, NewWorldSize, NewWorldSeed);
 
-    for (SnazzCraft::Chunk* ChunkPointer : NewWorldChunks) {
-        NewWorld->Chunks.insert({ INDEX_2D(ChunkPointer->Position[0], ChunkPointer->Position[1], NewWorld->Size), ChunkPointer });
+    for (size_t I = 0; I < ChunkPositionsToAdd.size(); I++) {
+        std::pair<int32_t, int32_t> NewChunkPosition = ChunkPositionsToAdd[I];
+        SnazzCraft::Chunk* NewChunk = new SnazzCraft::Chunk(NewChunkPosition.first, NewChunkPosition.second);
+
+        for (SnazzCraft::Voxel Voxel : VoxelsToAddToChunks[I]) {
+            NewChunk->Voxels.insert_or_assign(SnazzCraft::Chunk::LocalVoxelIndex(Voxel), Voxel);
+        }
+
+        NewChunk->CullVoxelFaces();
+        NewChunk->UpdateVerticesAndIndices();
+
+        NewChunk->UpdateMesh();
+        NewWorld->Chunks.insert_or_assign(INDEX_2D(NewChunkPosition.first, NewChunkPosition.second, NewWorld->Size), NewChunk);
+    }
+    
+    for (auto& [Key, Chunk] : NewWorld->Chunks) {
+        NewWorld->UpdateChunkLighting(Chunk);
     }
 
     File.close();
-    free(EmptyChar);
 
     return NewWorld;
 }

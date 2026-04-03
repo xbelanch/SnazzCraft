@@ -1,6 +1,6 @@
 #include "snazzcraft-engine/world/voxel.hpp"
 
-SnazzCraft::Voxel::Voxel(unsigned int X, unsigned int Y, unsigned int Z, unsigned int ID)
+SnazzCraft::Voxel::Voxel(uint32_t X, uint32_t Y, uint32_t Z, uint32_t ID)
 {
     this->Position[0] = X;
     this->Position[1] = Y;
@@ -8,7 +8,7 @@ SnazzCraft::Voxel::Voxel(unsigned int X, unsigned int Y, unsigned int Z, unsigne
     this->ID = ID;
 }
 
-SnazzCraft::Voxel::Voxel(unsigned int X, unsigned int Y, unsigned int Z, unsigned int ID, bool Cullable)
+SnazzCraft::Voxel::Voxel(uint32_t X, uint32_t Y, uint32_t Z, uint32_t ID, bool Cullable)
 {
     this->Position[0] = X;
     this->Position[1] = Y;
@@ -17,7 +17,7 @@ SnazzCraft::Voxel::Voxel(unsigned int X, unsigned int Y, unsigned int Z, unsigne
     this->Cullable = Cullable;
 }
 
-SnazzCraft::Voxel::Voxel(unsigned int X, unsigned int Y, unsigned int Z, unsigned int ID, bool Cullable, bool Collidable)
+SnazzCraft::Voxel::Voxel(uint32_t X, uint32_t Y, uint32_t Z, uint32_t ID, bool Cullable, bool Collidable)
 {
     this->Position[0] = X;
     this->Position[1] = Y;

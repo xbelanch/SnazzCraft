@@ -37,13 +37,16 @@ void SnazzCraft::Chunk::Generate(SnazzCraft::HeightMap* HeightMap, uint32_t MapW
             if (HeightAtPositionIterator->second != 0 && Y == HeightAtPositionIterator->second - 1) NewVoxelID = ID_VOXEL_DIRT_GRASS_MIX;
             else if (HeightAtPositionIterator->second != 0 && Y >= HeightAtPositionIterator->second - 4) NewVoxelID = ID_VOXEL_DIRT;
 
-            this->Voxels.insert({ SnazzCraft::Chunk::LocalVoxelIndex(X, Y, Z), SnazzCraft::Voxel(X, Y, Z, NewVoxelID) });
+            SnazzCraft::Voxel NewVoxel(X, Y, Z, NewVoxelID);
+            NewVoxel.AutoSetSpecificValues();
+
+            this->Voxels.insert({ SnazzCraft::Chunk::LocalVoxelIndex(X, Y, Z), NewVoxel });
         }
 
         // Testing Torches
         if (X != 5 || Z != 5) continue;
-        SnazzCraft::Voxel NewVoxel = SnazzCraft::Voxel(X, HeightAtPositionIterator->second, Z, ID_VOXEL_TORCH, false, false);
-        NewVoxel.LightProducingLevel = 18;
+        SnazzCraft::Voxel NewVoxel = SnazzCraft::Voxel(X, HeightAtPositionIterator->second, Z, ID_VOXEL_TORCH);
+        NewVoxel.AutoSetSpecificValues();
 
         this->Voxels.insert({ SnazzCraft::Chunk::LocalVoxelIndex(X, HeightAtPositionIterator->second, Z), NewVoxel });
     }

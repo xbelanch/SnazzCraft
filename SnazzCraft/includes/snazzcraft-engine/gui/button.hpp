@@ -21,10 +21,10 @@ namespace SnazzCraft
         void (*Callback)(SnazzCraft::Event* Event) = nullptr;
         SnazzCraft::Panel* ActivePanel = nullptr;
 
-        unsigned int Position[2];
-        unsigned int Dimensions[2];
+        uint32_t Position[2];
+        uint32_t Dimensions[2];
 
-        Button(unsigned int X, unsigned int Y, unsigned int Width, unsigned int Height);
+        Button(uint32_t X, uint32_t Y, uint32_t Width, uint32_t Height);
 
         ~Button();
 
