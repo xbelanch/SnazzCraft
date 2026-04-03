@@ -112,7 +112,7 @@ namespace SnazzCraft
         inline void UpdateChunkLighting(SnazzCraft::Chunk* Chunk) const
         {
             std::unordered_set<uint32_t> ChunksToUpdate;
-            for (const auto& VoxelPair : *Chunk->OptimizedVoxels) {
+            for (const auto& VoxelPair : Chunk->OptimizedVoxels) {
                 if (VoxelPair.second.LightProducingLevel <= 0) continue;
 
                 int32_t Position[3] = {

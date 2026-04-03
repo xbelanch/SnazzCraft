@@ -151,7 +151,7 @@ bool SnazzCraft::World::SaveWorldToFile(bool OverwriteExistingFile)
 
         File << WORLD_SAVE_FILE_DESCRIPTOR_CHUNK_BEGIN << ": " << Chunk->Position[0] << " " << Chunk->Position[1] << "\n";
 
-        for (auto& VoxelPair : *Chunk->Voxels) {
+        for (auto& VoxelPair : Chunk->Voxels) {
             File << WORLD_SAVE_FILE_DESCRIPTOR_CHUNK_NEW_VOXEL << ": " << VoxelPair.second.Position[0] << " " << VoxelPair.second.Position[1] << " " << VoxelPair.second.Position[2] << " " << VoxelPair.second.ID << "\n";
         }
 
@@ -175,18 +175,19 @@ void SnazzCraft::World::ApplyLightingVoxel(int32_t LightOrigin[3], int32_t Light
         if (OriginNode.LightValue <= 1) return;
 
         for (uint8_t I = 0; I < 3; I++) {
-            for (int8_t T = -1; T < 2; T += 2) {
-                int32_t NewPosition[3] = {
-                    OriginNode.X,
-                    OriginNode.Y,
-                    OriginNode.Z
-                };
-                NewPosition[I] += T;
+            int32_t NewPosition[3] = {
+                OriginNode.X,
+                OriginNode.Y,
+                OriginNode.Z
+            };
+            int32_t NewLightValue = OriginNode.LightValue - 1;
 
-                int32_t NewLightValue = OriginNode.LightValue - 1;
+            // Add in both directons on axies specified by I
+            NewPosition[I]--;
+            Queue.push(SnazzCraft::World::LightNode(NewLightValue, NewPosition));
 
-                Queue.push(SnazzCraft::World::LightNode(NewLightValue, NewPosition));
-            }
+            NewPosition[I] += 2;
+            Queue.push(SnazzCraft::World::LightNode(NewLightValue, NewPosition));
         }
     };
 
@@ -216,18 +217,18 @@ void SnazzCraft::World::ApplyLightingVoxel(int32_t LightOrigin[3], int32_t Light
         SnazzCraft::Chunk::GetLocalVoxelPosition(CurrentNode.X, CurrentNode.Y, CurrentNode.Z, Local);
         int32_t LightIndex = SnazzCraft::Chunk::LocalVoxelIndex(Local[0], Local[1], Local[2]);
         
-        auto ExistingLightIterator = ChunkIterator->second->LightValues->find(LightIndex);
-        int32_t CurrentExistingValue = (ExistingLightIterator == ChunkIterator->second->LightValues->end()) ? 0 : ExistingLightIterator->second;
+        auto ExistingLightIterator = ChunkIterator->second->LightValues.find(LightIndex);
+        int32_t CurrentExistingValue = (ExistingLightIterator == ChunkIterator->second->LightValues.end()) ? 0 : ExistingLightIterator->second;
 
         if (CurrentNode.LightValue > CurrentExistingValue) {
-            ChunkIterator->second->LightValues->insert_or_assign(LightIndex, CurrentNode.LightValue);
+            ChunkIterator->second->LightValues.insert_or_assign(LightIndex, CurrentNode.LightValue);
             ChunksToUpdate.insert(INDEX_2D(ChunkCoordinates[0], ChunkCoordinates[1], this->Size));
 
             int32_t LocalVoxelPosition[3];
             SnazzCraft::Chunk::GetLocalVoxelPosition(CurrentNode.X, CurrentNode.Y, CurrentNode.Z, LocalVoxelPosition);
-            auto VoxelIterator = ChunkIterator->second->OptimizedVoxels->find(SnazzCraft::Chunk::LocalVoxelIndex(LocalVoxelPosition[0], LocalVoxelPosition[1], LocalVoxelPosition[2]));
+            auto VoxelIterator = ChunkIterator->second->OptimizedVoxels.find(SnazzCraft::Chunk::LocalVoxelIndex(LocalVoxelPosition[0], LocalVoxelPosition[1], LocalVoxelPosition[2]));
             
-            if (CurrentNode.LightValue > 1 && (VoxelIterator == ChunkIterator->second->OptimizedVoxels->end() || First)) AddLightNodes(Queue, CurrentNode);
+            if (CurrentNode.LightValue > 1 && (VoxelIterator == ChunkIterator->second->OptimizedVoxels.end() || First)) AddLightNodes(Queue, CurrentNode);
         }
         First = false; 
     }
@@ -350,7 +351,7 @@ SnazzCraft::World* SnazzCraft::World::LoadWorldFromSaveFile(std::string FilePath
                 SnazzCraft::ParseData(NewInfo, Data, DataIndex, EmptyChar); 
                 NewVoxelInfo[3] = static_cast<uint32_t >(stoul(NewInfo));
 
-                NewChunk->Voxels->insert({ SnazzCraft::Chunk::LocalVoxelIndex(NewVoxelInfo[0], NewVoxelInfo[1], NewVoxelInfo[2]), SnazzCraft::Voxel(NewVoxelInfo[0], NewVoxelInfo[1], NewVoxelInfo[2], NewVoxelInfo[3]) }); 
+                NewChunk->Voxels.insert({ SnazzCraft::Chunk::LocalVoxelIndex(NewVoxelInfo[0], NewVoxelInfo[1], NewVoxelInfo[2]), SnazzCraft::Voxel(NewVoxelInfo[0], NewVoxelInfo[1], NewVoxelInfo[2], NewVoxelInfo[3]) }); 
 
                 break;
             }

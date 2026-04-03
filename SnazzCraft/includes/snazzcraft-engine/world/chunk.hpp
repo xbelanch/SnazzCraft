@@ -32,11 +32,11 @@ namespace SnazzCraft
     public:
         int32_t Position[2]; // X & Z Chunk Coordinates
 
-        SnazzCraft::Mesh* ChunkMesh = nullptr;
+        SnazzCraft::Mesh* ChunkMesh;
 
-        std::unordered_map<uint32_t, SnazzCraft::Voxel>* Voxels          = new std::unordered_map<uint32_t, SnazzCraft::Voxel>();
-        std::unordered_map<uint32_t, SnazzCraft::Voxel>* OptimizedVoxels = new std::unordered_map<uint32_t, SnazzCraft::Voxel>();
-        std::unordered_map<uint32_t, int>*               LightValues     = new std::unordered_map<uint32_t, int>();
+        std::unordered_map<uint32_t, SnazzCraft::Voxel> Voxels;
+        std::unordered_map<uint32_t, SnazzCraft::Voxel> OptimizedVoxels;
+        std::unordered_map<uint32_t, int>               LightValues;
         std::vector<SnazzCraft::Entity*> Entities;
 
         Chunk(int32_t X, int32_t Y); // Chunk Coordinates 
@@ -51,44 +51,29 @@ namespace SnazzCraft
 
         bool VoxelTouchingChunkBorder(uint32_t VoxelIndex, uint32_t* BorderDirection) const;
 
-        SnazzCraft::Voxel* GetCollidingVoxel(const SnazzCraft::Hitbox* Hitbox) const; // Returns nullptr if no collision
+        SnazzCraft::Voxel* GetCollidingVoxel(const SnazzCraft::Hitbox* Hitbox); // Returns nullptr if no collision
 
-        SnazzCraft::Voxel* GetCollidingVoxel(const glm::vec3& Position) const;
+        SnazzCraft::Voxel* GetCollidingVoxel(const glm::vec3& Position);
 
-        SnazzCraft::Voxel* GetCollidingVoxel(const SnazzCraft::Hitbox* Hitbox, int32_t LocalVoxelX, int32_t LocalVoxelY, int32_t LocalVoxelZ) const;
+        SnazzCraft::Voxel* GetCollidingVoxel(const SnazzCraft::Hitbox* Hitbox, int32_t LocalVoxelX, int32_t LocalVoxelY, int32_t LocalVoxelZ);
 
-        inline void UpdateLightingOnVertices()
-        {
-            constexpr float DefaultLightValue = 1.0f / MAX_VOXEL_LIGHT_VALUE;
-
-            uint32_t VoxelCount = 0;
-            for (const auto& [Key, OptimizedVoxel] : *this->OptimizedVoxels) {
-                uint32_t VerticeIndex = VoxelCount * 24; // 24 vertices per voxel
-
-                auto LightValueIterator = this->LightValues->find(SnazzCraft::Chunk::LocalVoxelIndex(OptimizedVoxel));
-                float LightValue = LightValueIterator != this->LightValues->end() ? static_cast<float>(LightValueIterator->second) / MAX_VOXEL_LIGHT_VALUE : DefaultLightValue;
-
-                for (uint32_t L = VerticeIndex; L < VerticeIndex + 24; L++) {
-                    (*this->Vertices)[L].Brightness = LightValue;
-                }
-
-                VoxelCount++;
-            }
-        }
+        void UpdateLightingOnVertices();
 
         inline void UpdateMesh()
         {
             delete this->ChunkMesh;
-            if (this->Vertices->empty() || this->Indices->empty()) { this->ChunkMesh = nullptr; return; }
+            if (this->Vertices.empty() || this->Indices.empty()) { this->ChunkMesh = nullptr; return; }
 
-            this->ChunkMesh = new SnazzCraft::Mesh(*this->Vertices, *this->Indices);
+            this->ChunkMesh = new SnazzCraft::Mesh(this->Vertices, this->Indices);
         }
 
     private:
         glm::vec3 ChunkWorldOffset;
 
-        std::vector<SnazzCraft::Vertice3D>* Vertices = nullptr;
-        std::vector<uint32_t>* Indices = nullptr;
+        std::vector<SnazzCraft::Vertice3D> Vertices;
+        std::vector<uint32_t> Indices;
+
+        SnazzCraft::Hitbox* VoxelCollisionHitbox;
 
         inline glm::vec3 LocalVoxelPositionToWorldPosition(uint32_t X, uint32_t Y, uint32_t Z) const
         {
@@ -104,7 +89,7 @@ namespace SnazzCraft
             VoxelPosition[2] = static_cast<int>(LocalPosition.z / SnazzCraft::Voxel::Size);
         }
 
-        SnazzCraft::Hitbox* VoxelCollisionHitbox = nullptr;
+        
 
     
     public:
@@ -131,6 +116,11 @@ namespace SnazzCraft
             OutLocalChunkPosition[2] = Z % SnazzCraft::Chunk::Depth;
         }
 
+        static inline uint32_t LocalVoxelIndex(int32_t X, int32_t Y, int32_t Z)
+        {
+            return INDEX_3D(X, Y, Z, SnazzCraft::Chunk::Width, SnazzCraft::Chunk::Height);
+        }
+
         static inline uint32_t LocalVoxelIndex(uint32_t X, uint32_t Y, uint32_t Z)
         {
             return INDEX_3D(X, Y, Z, SnazzCraft::Chunk::Width, SnazzCraft::Chunk::Height);
@@ -141,9 +131,14 @@ namespace SnazzCraft
             return INDEX_3D(Voxel.Position[0], Voxel.Position[1], Voxel.Position[2], SnazzCraft::Chunk::Width, SnazzCraft::Chunk::Height);
         }
 
-        static inline bool ValidLocalVoxelPosition(uint32_t X, uint32_t Y, uint32_t Z)
+        static inline bool ValidLocalVoxelPosition(int32_t X, int32_t Y, int32_t Z)
         {
             return X >= 0 && Y >= 0 && Z >= 0 && X < SnazzCraft::Chunk::Width && Y < SnazzCraft::Chunk::Height && Z < SnazzCraft::Chunk::Depth;
+        }
+
+        static inline bool ValidLocalVoxelPosition(uint32_t X, uint32_t Y, uint32_t Z)
+        {
+            return X < SnazzCraft::Chunk::Width && Y < SnazzCraft::Chunk::Height && Z < SnazzCraft::Chunk::Depth;
         }
 
     };
