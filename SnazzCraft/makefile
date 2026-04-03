@@ -7,9 +7,10 @@ CFLAGS = -I$(INCLUDES) -Werror -Wall -MMD -MP
 LDFLAGS = -lglfw -ldl -lGL -lnoise -lm
 
 CPP_SOURCES := $(shell find src -name '*.cpp')
-C_SOURCES   := $(shell find includes -name 'glad.c')
+C_SOURCES := $(shell find src -name '*.c')
+C_INCLUDE_SOURCES   := $(shell find includes -name 'glad.c')
 
-OBJS := $(CPP_SOURCES:%.cpp=build/%.o) $(C_SOURCES:%.c=build/%.o)
+OBJS := $(CPP_SOURCES:%.cpp=build/%.o) $(C_INCLUDE_SOURCES:%.c=build/%.o) $(C_SOURCES:%.c=build/%.o)
 DEPS := $(OBJS:.o=.d)
 
 all: bin/executable
