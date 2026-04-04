@@ -79,7 +79,7 @@ namespace SnazzCraft
 
         /*
         Calls UpdateVerticesAndIndices & UpdateMesh on all chunks affected
-        If the Chunk in the address given has not light producing voxels then no updating member functions of the Chunk will be called
+        If the Chunk in the address given has no light producing voxels then no member functions of that chunk will be called to update its vertices, indices, or mesh
         Not thread safe
         */
         void UpdateChunkLighting(SnazzCraft::Chunk* Chunk, bool* UpatedInputChunk);
@@ -96,11 +96,11 @@ namespace SnazzCraft
                 };
                 int32_t Position[3];
             };
-            int32_t LightValue;
+            int8_t LightValue;
 
-            LightNode(int32_t ILightValue, int32_t IX, int32_t IY, int32_t IZ);
+            LightNode(int8_t ILightValue, int32_t IX, int32_t IY, int32_t IZ);
 
-            LightNode(int32_t ILightValue, int32_t IPosition[3]);
+            LightNode(int8_t ILightValue, int32_t IPosition[3]);
         };
 
         SnazzCraft::HeightMap* WorldHeightMap = nullptr;

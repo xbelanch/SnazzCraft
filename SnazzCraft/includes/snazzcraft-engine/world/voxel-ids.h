@@ -17,5 +17,6 @@
 #define ID_VOXEL_ORE_EMERALD (13)
 #define ID_VOXEL_BARRIER (14)
 #define ID_VOXEL_TORCH (15)
+#define ID_VOXEL_WATER (16)
 
 #endif // SNAZZCRAFT_VOXEL_IDS_H

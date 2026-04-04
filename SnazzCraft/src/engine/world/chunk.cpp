@@ -33,14 +33,37 @@ void SnazzCraft::Chunk::Generate(SnazzCraft::HeightMap* HeightMap, uint32_t MapW
         if (HeightAtPositionIterator == HeightMap->HeightValues.end()) continue;
 
         uint32_t HeightToGenerate = HeightAtPositionIterator->second + SnazzCraft::Chunk::OceanLevel;
-        for (uint32_t Y = 0; Y < HeightToGenerate; Y++) {
+        uint32_t Y = 0;
+        while (true)
+        {
             uint32_t NewVoxelID = ID_VOXEL_STONE;
 
-            if (HeightToGenerate != 0 && Y == HeightToGenerate - 1 && Y >= SnazzCraft::Chunk::OceanLevel) NewVoxelID = ID_VOXEL_DIRT_GRASS_MIX;
-            else if (HeightToGenerate != 0 && Y >= HeightToGenerate - 4) NewVoxelID = ID_VOXEL_DIRT;
+            if (HeightToGenerate != 0 && Y == HeightToGenerate - 1) {
+                if (Y >= SnazzCraft::Chunk::OceanLevel - 1) {
+                    NewVoxelID = ID_VOXEL_DIRT_GRASS_MIX;
+                } else {
+                    NewVoxelID = ID_VOXEL_DIRT; 
+                }
+            } else if (HeightToGenerate != 0 && Y >= HeightToGenerate - 4) {
+                NewVoxelID = ID_VOXEL_DIRT;
+            }
 
             SnazzCraft::Voxel NewVoxel(X, Y, Z, NewVoxelID);
             this->Voxels.insert({ SnazzCraft::Chunk::LocalVoxelIndex(X, Y, Z), NewVoxel });
+
+            Y++;
+            if (Y >= HeightToGenerate) {
+                if (Y >= SnazzCraft::Chunk::OceanLevel) break;
+                
+                while (Y < SnazzCraft::Chunk::OceanLevel)
+                {
+                    SnazzCraft::Voxel NewVoxel(X, Y, Z, ID_VOXEL_WATER);
+                    this->Voxels.insert({ SnazzCraft::Chunk::LocalVoxelIndex(X, Y, Z), NewVoxel });
+                    Y++;
+                }
+                
+                break;
+            }
         }
 
         // Testing Torches
@@ -82,10 +105,12 @@ void SnazzCraft::Chunk::UpdateVerticesAndIndices()
 
 void SnazzCraft::Chunk::CullVoxelFaces()
 {
-    for (auto VoxelPair : this->Voxels)  {
-        if (!VoxelPair.second.GetVoxelType().Cullable) continue;
+    for (auto& VoxelPair : this->Voxels)  {
+        const SnazzCraft::VoxelType& PairType = VoxelPair.second.GetVoxelType();
 
-        for (int32_t I = 5; I >= 0; I--) {
+        for (int8_t I = 5; I >= 0; I--) {
+            if (!SnazzCraft::AccessBitValue(PairType.CullableSides, I)) continue;
+
             int32_t CheckPosition[3] = {
                 (int)(VoxelPair.second.X) + SnazzCraft::VoxelCheckPositions[I][0],
                 (int)(VoxelPair.second.Y) + SnazzCraft::VoxelCheckPositions[I][1],
@@ -97,7 +122,7 @@ void SnazzCraft::Chunk::CullVoxelFaces()
             auto CurrentIterator = this->Voxels.find(SnazzCraft::Chunk::LocalVoxelIndex(CheckPosition[0], CheckPosition[1], CheckPosition[2]));
             if (CurrentIterator == this->Voxels.end()) continue;
 
-            if (!CurrentIterator->second.GetVoxelType().Cullable) continue;
+            if (!SnazzCraft::AccessBitValue(CurrentIterator->second.GetVoxelType().CullableSides, I)) continue;
       
             VoxelPair.second.ChangeSideValue(I, false);
         }
