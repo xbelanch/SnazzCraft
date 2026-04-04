@@ -35,7 +35,7 @@ namespace SnazzCraft
         SnazzCraft::Mesh* ChunkMesh;
 
         std::unordered_map<uint32_t, SnazzCraft::Voxel> Voxels; // Voxel positioning is in local chunk space
-        std::unordered_map<uint32_t, int>               LightValues;
+        std::unordered_map<uint32_t, int> LightValues;
         std::vector<SnazzCraft::Entity*> Entities;
 
         Chunk(int32_t X, int32_t Y); // Chunk Coordinates 

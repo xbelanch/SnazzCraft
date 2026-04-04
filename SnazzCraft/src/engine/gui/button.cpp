@@ -42,7 +42,7 @@ void SetWorldModeButtonCallback(SnazzCraft::Event* Event)
     SnazzCraft::World* NewWorld = SnazzCraft::CurrentWorld;
 
     if (NewWorld == nullptr) { 
-        NewWorld = SnazzCraft::World::CreateWorld("default-generated-world", 5, 58008);
+        NewWorld = SnazzCraft::World::CreateWorld("default-generated-world", 15, 58008);
         //NewWorld = SnazzCraft::World::LoadWorldFromSaveFile("worlds/default-generated-world.txt");
     }
 

@@ -9,6 +9,7 @@
 #include "../world/voxel.hpp"
 #include "../world/voxel-ids.h"
 #include "../mesh/mesh.hpp"
+#include "snazzcraft-engine/utilities/math.hpp"
 
 #define ATLAS_SIZE (5)
 #define VOXEL_TEXTURE_SIZE_PIXELS (256)

@@ -33,7 +33,9 @@ void SnazzCraft::World::GenerateChunk(uint32_t X, uint32_t Z, bool ApplyLighting
 
     this->Chunks[ChunkIndex] = NewChunk;
     bool UpdatedChunk;
-    if (ApplyLighting) this->UpdateChunkLighting(NewChunk, &UpdatedChunk); 
+    if (ApplyLighting) { 
+        this->UpdateChunkLighting(NewChunk, &UpdatedChunk); 
+    }
 
     if (!UpdatedChunk) {
         NewChunk->UpdateLightingOnVertices();
@@ -176,6 +178,7 @@ void SnazzCraft::World::UpdateChunkLighting(SnazzCraft::Chunk* Chunk, bool* Upda
         };
         this->ApplyLightingVoxel(Position, LightProducingLevel, ChunksToUpdate);
     }
+    this->ApplySunLightingToChunk(Chunk, ChunksToUpdate);
     
     for (uint32_t I : ChunksToUpdate) {
         auto ChunkIterator = this->Chunks.find(I);
@@ -189,6 +192,34 @@ void SnazzCraft::World::UpdateChunkLighting(SnazzCraft::Chunk* Chunk, bool* Upda
     if (UpdatedInputChunk != nullptr) *UpdatedInputChunk = ChunkIterator != ChunksToUpdate.end();
 }
 
+void SnazzCraft::World::ApplySunLightingToChunk(SnazzCraft::Chunk* Chunk, std::unordered_set<uint32_t>& ChunksToUpdate)
+{
+    for (uint32_t Z = 0; Z < SnazzCraft::Chunk::Depth; Z++) {
+    for (uint32_t X = 0; X < SnazzCraft::Chunk::Width; X++) {
+        this->ApplySunLightingToColumn(Chunk, X, Z);
+    }
+    }
+
+    ChunksToUpdate.insert(INDEX_2D(Chunk->Position[0], Chunk->Position[1], this->Size));
+}
+
+void SnazzCraft::World::ApplySunLightingToColumn(SnazzCraft::Chunk* Chunk, uint32_t LocalChunkX, uint32_t LocalChunkZ)
+{
+    for (uint32_t Y = SnazzCraft::Chunk::Height; Y > 0; Y--) {
+        uint32_t LightY = Y - 1;
+        uint32_t LocalIndex = SnazzCraft::Chunk::LocalVoxelIndex(LocalChunkX, LightY, LocalChunkZ);
+
+        auto LightIterator = Chunk->LightValues.find(LocalIndex);
+        if (LightIterator == Chunk->LightValues.end()) {
+            Chunk->LightValues.insert_or_assign(LocalIndex, 15); // Sunlight is light level 15    
+        } else {
+            LightIterator->second = LightIterator->second >= 15 ? LightIterator->second : 15;
+        }
+
+        auto VoxelIterator = Chunk->Voxels.find(LocalIndex);
+        if (VoxelIterator != Chunk->Voxels.end()) break;
+    }
+}
 
 void SnazzCraft::World::ApplyLightingVoxel(int32_t LightOrigin[3], int32_t LightProducingLevel, std::unordered_set<uint32_t>& ChunksToUpdate)
 {
@@ -209,7 +240,7 @@ void SnazzCraft::World::ApplyLightingVoxel(int32_t LightOrigin[3], int32_t Light
                 OriginNode.Z
             };
 
-            // Add in both directons on axies specified by I
+            // Add in both directons on axis specified by I
             NewPosition[I]--;
             Queue.push(SnazzCraft::World::LightNode(NewLightValue, NewPosition));
 
@@ -253,8 +284,7 @@ void SnazzCraft::World::ApplyLightingVoxel(int32_t LightOrigin[3], int32_t Light
             int32_t LocalVoxelPosition[3];
             SnazzCraft::Chunk::GetLocalVoxelPosition(CurrentNode.X, CurrentNode.Y, CurrentNode.Z, LocalVoxelPosition);
             auto VoxelIterator = ChunkIterator->second->Voxels.find(SnazzCraft::Chunk::LocalVoxelIndex(LocalVoxelPosition[0], LocalVoxelPosition[1], LocalVoxelPosition[2]));
-            bool VoxelAtPosition = VoxelIterator != ChunkIterator->second->Voxels.end();
-            int LightPropogationDecrease = VoxelAtPosition ? VoxelIterator->second.GetVoxelType().LightPropogationDecrease: 1;
+            int LightPropogationDecrease = VoxelIterator != ChunkIterator->second->Voxels.end() ? VoxelIterator->second.GetVoxelType().LightPropogationDecrease: 1;
 
             AddLightNodes(Queue, CurrentNode, LightPropogationDecrease);
         }

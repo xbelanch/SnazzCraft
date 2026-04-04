@@ -17,7 +17,7 @@ namespace SnazzCraft
     inline bool AccessBitValue(const uint8_t& Byte, uint8_t Index)
     {
         if (Index > 7) return false;
-        return (Byte >> Index) & 1;
+        return (Byte >> Index) & true;
     }
 };
 

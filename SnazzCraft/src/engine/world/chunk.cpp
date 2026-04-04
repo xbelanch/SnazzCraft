@@ -99,6 +99,7 @@ void SnazzCraft::Chunk::UpdateVerticesAndIndices()
             for (uint32_t I = 0; I < 6; I++) {
                 this->Indices.push_back(SnazzCraft::VoxelMesh->Indices[INDEX_2D(I, SideIndex, 6)] + this->Vertices.size() - NewVerticesCount);
             }
+            
         }
     }
 }
@@ -211,12 +212,12 @@ void SnazzCraft::Chunk::UpdateLightingOnVertices()
     constexpr float DefaultLightValue = 1.0f / static_cast<float>(SnazzCraft::Voxel::MaxLightValue);
 
     uint32_t VoxelCount = 0;
-    for (const auto& [Key, OptimizedVoxel] : this->Voxels) {
-        if (OptimizedVoxel.GetSideCount() == 0) continue;
+    for (const auto& [Key, Voxel] : this->Voxels) {
+        if (Voxel.GetSideCount() == 0) continue;
 
         uint32_t VerticeIndex = VoxelCount * 24; // 24 vertices per voxel
 
-        auto LightValueIterator = this->LightValues.find(SnazzCraft::Chunk::LocalVoxelIndex(OptimizedVoxel));
+        auto LightValueIterator = this->LightValues.find(SnazzCraft::Chunk::LocalVoxelIndex(Voxel));
         float LightValue = LightValueIterator != this->LightValues.end() ? static_cast<float>(LightValueIterator->second) / SnazzCraft::Voxel::MaxLightValue : DefaultLightValue;
 
         for (uint32_t L = VerticeIndex; L < VerticeIndex + 24; L++) {

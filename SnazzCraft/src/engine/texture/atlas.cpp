@@ -15,7 +15,7 @@ SnazzCraft::VoxelTextureApplier::~VoxelTextureApplier()
 std::vector<SnazzCraft::VoxelVertice> SnazzCraft::VoxelTextureApplier::GetTexturedVertices(const SnazzCraft::Voxel& Voxel)
 {
     constexpr glm::vec2 HalfPixel(HALF_PIXEL, HALF_PIXEL);   
-    constexpr int HalfVoxelSize = static_cast<int>(SnazzCraft::Voxel::Size / 2.0f);
+    constexpr int32_t HalfVoxelSize = static_cast<int32_t>(SnazzCraft::Voxel::Size / 2.0f);
 
     std::vector<SnazzCraft::VoxelVertice> Vertices;
 
@@ -51,8 +51,8 @@ std::vector<SnazzCraft::VoxelVertice> SnazzCraft::VoxelTextureApplier::GetTextur
         case ID_VOXEL_TORCH:
         {
             // Update Texture Coordinates
-            for (unsigned int I = 0; I < 6; I++) {
-                unsigned int Index = I * 4;
+            for (uint32_t I = 0; I < 6; I++) {
+                uint32_t Index = I * 4;
 
                 Vertices[Index + 0].TextureCoordinate.x += TEXTURE_COORDINATE_TORCH_OFFSET_X * ATLAS_TILE_SIZE;
 
@@ -72,7 +72,7 @@ std::vector<SnazzCraft::VoxelVertice> SnazzCraft::VoxelTextureApplier::GetTextur
             Vertices[22].TextureCoordinate.y += ATLAS_TILE_SIZE * 0.5f;
             
             // Update Positions
-            for (unsigned int I = 0; I < 24; I++) { 
+            for (uint32_t I = 0; I < 24; I++) { 
                 Vertices[I].Position.x = Vertices[I].Position.x < 0.0f ? -0.125f * HalfVoxelSize : 0.125f * HalfVoxelSize;
                 Vertices[I].Position.y = Vertices[I].Position.y > 0.0f ?  0.75f  * HalfVoxelSize : Vertices[I].Position.y; 
                 Vertices[I].Position.z = Vertices[I].Position.z < 0.0f ? -0.125f * HalfVoxelSize : 0.125f * HalfVoxelSize;

@@ -104,6 +104,10 @@ namespace SnazzCraft
         };
 
         SnazzCraft::HeightMap* WorldHeightMap = nullptr;
+
+        void ApplySunLightingToChunk(SnazzCraft::Chunk* Chunk, std::unordered_set<uint32_t>& ChunksToUpdate);
+
+        void ApplySunLightingToColumn(SnazzCraft::Chunk* Chunk, uint32_t LocalChunkX, uint32_t LocalChunkZ);
         
         /*
         Only to be called trough UpdateChunkLighting
