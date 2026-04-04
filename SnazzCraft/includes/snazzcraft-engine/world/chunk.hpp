@@ -35,7 +35,6 @@ namespace SnazzCraft
         SnazzCraft::Mesh* ChunkMesh;
 
         std::unordered_map<uint32_t, SnazzCraft::Voxel> Voxels; // Voxel positioning is in local chunk space
-        std::unordered_map<uint32_t, SnazzCraft::Voxel> OptimizedVoxels;
         std::unordered_map<uint32_t, int>               LightValues;
         std::vector<SnazzCraft::Entity*> Entities;
 
@@ -93,7 +92,7 @@ namespace SnazzCraft
         static constexpr int16_t Width  = 16;
         static constexpr int16_t Height = 256;
         static constexpr int16_t Depth  = 16;
-        static constexpr int16_t OceanLevel = 125;
+        static constexpr int16_t OceanLevel = 20; // 125
         static constexpr int16_t MaxOceanDepth = 40;
 
         static inline void GetChunkPosition(const glm::vec3& Position, int32_t OutChunkPosition[2]) // Voxel space coordinates

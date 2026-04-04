@@ -82,7 +82,7 @@ namespace SnazzCraft
         If the Chunk in the address given has not light producing voxels then no updating member functions of the Chunk will be called
         Not thread safe
         */
-        void UpdateChunkLighting(SnazzCraft::Chunk* Chunk);
+        void UpdateChunkLighting(SnazzCraft::Chunk* Chunk, bool* UpatedInputChunk);
         
 
     private:

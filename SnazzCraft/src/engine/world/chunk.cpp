@@ -1,7 +1,7 @@
 #include "snazzcraft-engine/world/chunk.hpp"
 
 SnazzCraft::Chunk::Chunk(int32_t X, int32_t Y)
-: ChunkMesh(nullptr), Voxels(std::unordered_map<uint32_t, SnazzCraft::Voxel>()), OptimizedVoxels(std::unordered_map<uint32_t, SnazzCraft::Voxel>()), 
+: ChunkMesh(nullptr), Voxels(std::unordered_map<uint32_t, SnazzCraft::Voxel>()), 
   LightValues(std::unordered_map<uint32_t, int>()), Vertices(std::vector<SnazzCraft::VoxelVertice>()), Indices(std::vector<uint32_t>()), 
   VoxelCollisionHitbox(new SnazzCraft::Hitbox(glm::vec3(0.0f), glm::vec3((float)SnazzCraft::Voxel::Size, (float)SnazzCraft::Voxel::Size, (float)SnazzCraft::Voxel::Size)))
 {
@@ -57,7 +57,9 @@ void SnazzCraft::Chunk::UpdateVerticesAndIndices()
     this->Vertices.clear();
     this->Indices.clear();
 
-    for (const auto& VoxelPair : this->OptimizedVoxels) {
+    for (const auto& VoxelPair : this->Voxels) {
+        if (VoxelPair.second.GetSideCount() == 0) continue;
+
         const glm::vec3 Offset = glm::vec3((float)VoxelPair.second.X, (float)VoxelPair.second.Y, (float)VoxelPair.second.Z) * glm::vec3((float)SnazzCraft::Voxel::Size, (float)SnazzCraft::Voxel::Size, (float)SnazzCraft::Voxel::Size) + this->ChunkWorldOffset; 
         uint32_t NewVerticesCount = 0;
 
@@ -80,10 +82,8 @@ void SnazzCraft::Chunk::UpdateVerticesAndIndices()
 
 void SnazzCraft::Chunk::CullVoxelFaces()
 {
-    this->OptimizedVoxels.clear();
-
     for (auto VoxelPair : this->Voxels)  {
-        if (!VoxelPair.second.GetVoxelType().Cullable) { this->OptimizedVoxels.insert({ VoxelPair.first, VoxelPair.second }); continue; }
+        if (!VoxelPair.second.GetVoxelType().Cullable) continue;
 
         for (int32_t I = 5; I >= 0; I--) {
             int32_t CheckPosition[3] = {
@@ -101,8 +101,6 @@ void SnazzCraft::Chunk::CullVoxelFaces()
       
             VoxelPair.second.ChangeSideValue(I, false);
         }
-
-        if (VoxelPair.second.GetSideCount() != 0) this->OptimizedVoxels.insert({ VoxelPair.first, VoxelPair.second });
     }
 }
 
@@ -188,7 +186,9 @@ void SnazzCraft::Chunk::UpdateLightingOnVertices()
     constexpr float DefaultLightValue = 1.0f / static_cast<float>(SnazzCraft::Voxel::MaxLightValue);
 
     uint32_t VoxelCount = 0;
-    for (const auto& [Key, OptimizedVoxel] : this->OptimizedVoxels) {
+    for (const auto& [Key, OptimizedVoxel] : this->Voxels) {
+        if (OptimizedVoxel.GetSideCount() == 0) continue;
+
         uint32_t VerticeIndex = VoxelCount * 24; // 24 vertices per voxel
 
         auto LightValueIterator = this->LightValues.find(SnazzCraft::Chunk::LocalVoxelIndex(OptimizedVoxel));
