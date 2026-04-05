@@ -227,6 +227,8 @@ void RenderWorld()
 
 void WorldInputCallback(SnazzCraft::Event* Event)
 {
+    static uint8_t VoxelIDToPlace = 0;
+
     if (SnazzCraft::CurrentWorld == nullptr) return;
 
     if (!SnazzCraft::WorldGUI->InInventory) { // Not in inventory
@@ -239,6 +241,50 @@ void WorldInputCallback(SnazzCraft::Event* Event)
 
                 switch (*Key)
                 {
+                    case SNAZZCRAFT_KEY_0:
+                        VoxelIDToPlace = 0;
+                        break;
+                    
+                    case SNAZZCRAFT_KEY_1:
+                        VoxelIDToPlace = 1;
+                        break;
+                    
+                    case SNAZZCRAFT_KEY_2:
+                        VoxelIDToPlace = 2;
+                        break;
+                    
+                    case SNAZZCRAFT_KEY_3:
+                        VoxelIDToPlace = 3;
+                        break;
+
+                    case SNAZZCRAFT_KEY_4:
+                        VoxelIDToPlace = 4;
+                        break;
+                    
+                    case SNAZZCRAFT_KEY_5:
+                        VoxelIDToPlace = 5;
+                        break;
+
+                    case SNAZZCRAFT_KEY_6:
+                        VoxelIDToPlace = 6;
+                        break;
+                    
+                    case SNAZZCRAFT_KEY_7:
+                        VoxelIDToPlace = 7;
+                        break;
+
+                    case SNAZZCRAFT_KEY_8:
+                        VoxelIDToPlace = 8;
+                        break;
+                    
+                    case SNAZZCRAFT_KEY_9:
+                        VoxelIDToPlace = 9;
+                        break;
+
+                    case SNAZZCRAFT_KEY_T:
+                        VoxelIDToPlace = ID_VOXEL_TORCH;
+                        break;
+
                     case SNAZZCRAFT_KEY_ESCAPE:
                         SnazzCraft::CloseApplication = true;
                         break;
@@ -294,7 +340,7 @@ void WorldInputCallback(SnazzCraft::Event* Event)
             {
                 if (SnazzCraft::CurrentWorld == nullptr) break;
 
-                SnazzCraft::CurrentWorld->PlaceVoxel(SnazzCraft::Player->Position, SnazzCraft::Player->Rotation, ID_VOXEL_OAK_WOOD);
+                SnazzCraft::CurrentWorld->PlaceVoxel(SnazzCraft::Player->Position, SnazzCraft::Player->Rotation, VoxelIDToPlace);
 
                 break;
             }

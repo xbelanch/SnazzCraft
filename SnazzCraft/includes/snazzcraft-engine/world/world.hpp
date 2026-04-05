@@ -124,7 +124,10 @@ namespace SnazzCraft
         glm::vec3 VoxelPlacementDisplayPosition;
         bool RenderVoxelPlacementDisplay = false;
 
-        bool RaycastToVoxel(glm::vec3& Position, const glm::vec3& Rotation, float MaxDistance); // Rotation not normalized
+        /*
+        Rotation is expected to not be normalized
+        */
+        bool RaycastToVoxel(glm::vec3& Position, const glm::vec3& Rotation, float MaxDistance, uint8_t* FaceHit, SnazzCraft::Voxel** VoxelHit); 
 
         void ApplySunLightingToChunk(SnazzCraft::Chunk* Chunk, std::unordered_set<uint32_t>& ChunksToUpdate);
 

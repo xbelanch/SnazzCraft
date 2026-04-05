@@ -30,7 +30,7 @@ namespace SnazzCraft
 
         Voxel(uint8_t IX, uint8_t IY, uint8_t IZ, uint8_t IID);
 
-        virtual ~Voxel() = default;
+        ~Voxel() = default;
 
         const SnazzCraft::VoxelType& GetVoxelType() const;
 
