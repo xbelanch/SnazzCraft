@@ -2,7 +2,7 @@
 #define SNAZZCRAFT_VOXEL_IDS_H
 
 #define ID_VOXEL_STONE (0)
-#define ID_VOXEL_WOOD (1)
+#define ID_VOXEL_OAK_WOOD (1)
 #define ID_VOXEL_GRASS (2)
 #define ID_VOXEL_DIRT (3)
 #define ID_VOXEL_ABOVE_GRASS (4)

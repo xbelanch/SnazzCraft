@@ -15,7 +15,7 @@ glm::vec3 SnazzCraft::CalculateFrontVector(const glm::vec3& Rotation, bool Norma
     Front.y = SinPitch;
     Front.z = SinYaw * CosPitch;
 
-    if (Normalize) Front   = glm::normalize(Front);
+    if (Normalize) Front = glm::normalize(Front);
     
     return Front;
 }

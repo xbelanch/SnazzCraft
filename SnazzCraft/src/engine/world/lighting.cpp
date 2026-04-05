@@ -7,15 +7,15 @@ SnazzCraft::World::LightNode::LightNode(int8_t ILightValue, int32_t IX, int32_t 
 }
 
 SnazzCraft::World::LightNode::LightNode(int8_t ILightValue, int32_t IPosition[3])
-    : LightValue(ILightValue)
+    : X(IPosition[0]), Y(IPosition[1]), Z(IPosition[2]), LightValue(ILightValue)
 {
-    this->Position[0] = IPosition[0];
-    this->Position[1] = IPosition[1];
-    this->Position[2] = IPosition[2];
+    
 }
 
 void SnazzCraft::World::UpdateChunkLighting(SnazzCraft::Chunk* Chunk, bool* UpdatedInputChunk)
 {
+    Chunk->LightValues.clear();
+
     std::unordered_set<uint32_t> ChunksToUpdate;
     for (const auto& VoxelPair : Chunk->Voxels) {
         int32_t LightProducingLevel = VoxelPair.second.GetVoxelType().LightProducingLevel;

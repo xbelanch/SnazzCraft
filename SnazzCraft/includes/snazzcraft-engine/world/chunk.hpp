@@ -107,11 +107,11 @@ namespace SnazzCraft
             OutChunkPosition[1] = Z / SnazzCraft::Chunk::Depth;
         }
 
-        static inline void GetLocalVoxelPosition(int32_t X, int32_t Y, int32_t Z, int32_t OutLocalChunkPosition[3]) // Voxel space coordinates
+        static inline void GetLocalVoxelPosition(int32_t X, int32_t Y, int32_t Z, int32_t OutLocalVoxelPosition[3]) // Voxel space coordinates
         {
-            OutLocalChunkPosition[0] = X % SnazzCraft::Chunk::Width;
-            OutLocalChunkPosition[1] = Y % SnazzCraft::Chunk::Height;
-            OutLocalChunkPosition[2] = Z % SnazzCraft::Chunk::Depth;
+            OutLocalVoxelPosition[0] = X % SnazzCraft::Chunk::Width;
+            OutLocalVoxelPosition[1] = Y % SnazzCraft::Chunk::Height;
+            OutLocalVoxelPosition[2] = Z % SnazzCraft::Chunk::Depth;
         }
 
         static constexpr uint32_t LocalVoxelIndex(int32_t X, int32_t Y, int32_t Z)

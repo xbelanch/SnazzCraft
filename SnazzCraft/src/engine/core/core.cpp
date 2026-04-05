@@ -284,6 +284,15 @@ void WorldInputCallback(SnazzCraft::Event* Event)
                 break;
             }
 
+            case SNAZZCRAFT_EVENT_MOUSE_CLICK_RIGHT_PRESS:
+            {
+                if (SnazzCraft::CurrentWorld == nullptr) break;
+
+                SnazzCraft::CurrentWorld->PlaceVoxel(SnazzCraft::Player->Position, SnazzCraft::Player->Rotation, ID_VOXEL_OAK_WOOD);
+
+                break;
+            }
+
             case SNAZZCRAFT_EVENT_MOUSE_CLICK_LEFT_PRESS:
             {
                 Event->EventData->Items.push_back(SnazzCraft::WorldGUI);

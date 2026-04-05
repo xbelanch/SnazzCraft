@@ -41,6 +41,7 @@ namespace SnazzCraft
         int32_t Seed;
         
         uint32_t RenderDistance = 50;
+        float PlayerReach = static_cast<float>(SnazzCraft::Voxel::Size * 5);
 
         std::unordered_map<uint32_t, SnazzCraft::Chunk*> Chunks;
 
@@ -52,13 +53,13 @@ namespace SnazzCraft
 
         void RenderChunks(SnazzCraft::User* Player); // Thread safe
 
-        SnazzCraft::Voxel* GetCollidingVoxel(const SnazzCraft::Hitbox* Hitbox) const; // Returns nullptr if no collision - not thread safe
+        SnazzCraft::Voxel* GetCollidingVoxel(const SnazzCraft::Hitbox* Hitbox) const; // Returns nullptr if no collision 
 
-        SnazzCraft::Voxel* GetCollidingVoxel(const glm::vec3& Position) const; // Returns nullptr if no collision - not thread safe
+        SnazzCraft::Voxel* GetCollidingVoxel(const glm::vec3& Position) const; // Returns nullptr if no collision - Position should be in world space
 
-        void MoveEntity(SnazzCraft::Entity* Entity, const glm::vec3& Rotation, float Distance) const; // Returns true if movement occurred without voxel collision - not thread safe
+        void MoveEntity(SnazzCraft::Entity* Entity, const glm::vec3& Rotation, float Distance) const; // Returns true if movement occurred without voxel collision 
 
-        void MoveEntity(glm::vec3 Translation, SnazzCraft::Entity* Entity) const; // Returns true if movement occurred without voxel collision - not thread safe
+        void MoveEntity(glm::vec3 Translation, SnazzCraft::Entity* Entity) const; // Returns true if movement occurred without voxel collision 
 
         bool SaveWorldToFile(bool OverwriteExistingFile); 
 
@@ -84,6 +85,8 @@ namespace SnazzCraft
         */
         void UpdateChunkLighting(SnazzCraft::Chunk* Chunk, bool* UpatedInputChunk);
 
+        bool PlaceVoxel(const glm::vec3& Position, const glm::vec3& Rotation, uint8_t VoxelID);
+
     private:
         struct LightNode
         {
@@ -104,7 +107,7 @@ namespace SnazzCraft
 
         SnazzCraft::HeightMap* WorldHeightMap = nullptr;
 
-        
+        bool RaycastToVoxel(glm::vec3& Position, const glm::vec3& Rotation, float MaxDistance); // Rotation not normalized
 
         void ApplySunLightingToChunk(SnazzCraft::Chunk* Chunk, std::unordered_set<uint32_t>& ChunksToUpdate);
 
