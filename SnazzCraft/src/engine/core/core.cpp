@@ -115,6 +115,8 @@ bool SnazzCraft::Initiate()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     glfwSetMouseButtonCallback(SnazzCraft::Window, MouseButtonCallback);
+
+    SnazzCraft::EntityType::Initialize();
     
     SnazzCraft::VoxelMesh = new Mesh(VoxelMeshVertices, VoxelMeshIndices);
 
@@ -144,7 +146,7 @@ void SnazzCraft::MainLoop()
             case SNAZZCRAFT_USER_MODE_WORLD:
                 if (SnazzCraft::CurrentWorld == nullptr || SnazzCraft::WorldGUI == nullptr) break;
 
-                SnazzCraft::CurrentWorld->ApplyGravityToEntities({ SnazzCraft::Player });
+                SnazzCraft::CurrentWorld->ApplyGravityToAllEntities();
 
                 // Poll and handle events
                 SnazzCraft::WorldGUI->GUIInputHandler->PollEvents();
@@ -182,9 +184,11 @@ void SnazzCraft::FreeResources()
 {
     SnazzCraft::CurrentWorld->SaveWorldToFile(true);
 
+    SnazzCraft::EntityType::FreeResources();
+
+    delete SnazzCraft::Player;
     delete SnazzCraft::VoxelShader;
     delete SnazzCraft::VoxelMesh;
-    delete SnazzCraft::Player;
     delete SnazzCraft::EngineVoxelTextureApplier;
     delete SnazzCraft::CurrentWorld;
     delete SnazzCraft::MenuGUI;
@@ -197,6 +201,14 @@ void SnazzCraft::FreeResources()
 
 void RenderWorld()
 {
+    if (SnazzCraft::CurrentWorld->Entities.size() == 0) {
+        SnazzCraft::CurrentWorld->Entities.push_back(new SnazzCraft::Entity(glm::vec3(10.0f, 70.0f, 10.0f), glm::vec3(0.0f, 45.0f, 0.0f), ID_ENTITY_TEST));
+    } else {
+        SnazzCraft::CurrentWorld->Entities[0]->Rotation.x += 0.5f;
+        SnazzCraft::CurrentWorld->Entities[0]->Rotation.y += 1.0f;
+        SnazzCraft::CurrentWorld->Entities[0]->Rotation.z += 1.5f;
+    }
+
     if (!SnazzCraft::VoxelTextureAtlas->BindTexture()) return;
 
     SnazzCraft::VoxelShader->use(); 
@@ -211,18 +223,9 @@ void RenderWorld()
     else {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
-
-    SnazzCraft::ModelMatrix = glm::mat4(1.0f); // Chunk vertices are stored in world space so no transformation is needed
-    glUniformMatrix4fv(SnazzCraft::ModelLock, 1, GL_FALSE, glm::value_ptr(SnazzCraft::ModelMatrix));
     
-    SnazzCraft::CurrentWorld->RenderChunks(SnazzCraft::Player);
-
     SnazzCraft::CurrentWorld->UpdateVoxelPlacementDisplayPosition();
-    SnazzCraft::ModelMatrix = glm::mat4(1.0f);
-    SnazzCraft::ModelMatrix = glm::translate(SnazzCraft::ModelMatrix, SnazzCraft::CurrentWorld->GetVoxelPlacementDisplayPosition());
-    glUniformMatrix4fv(SnazzCraft::ModelLock, 1, GL_FALSE, glm::value_ptr(SnazzCraft::ModelMatrix));
-    SnazzCraft::CurrentWorld->RenderVoxelPlacementDisplayPosition();
-
+    SnazzCraft::CurrentWorld->Render();
 }
 
 void WorldInputCallback(SnazzCraft::Event* Event)

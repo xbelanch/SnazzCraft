@@ -1,24 +1,19 @@
 #include "snazzcraft-engine/entity/entity.hpp"
 
-SnazzCraft::Entity::Entity(glm::vec3 Position, glm::vec3 Rotation)
+SnazzCraft::Entity::Entity(glm::vec3 IPosition, glm::vec3 IRotation, uint8_t IID)
+    : Position(IPosition), Rotation(IRotation), ID(IID)
 {
-    this->Position = Position;
-    this->Rotation = Rotation;
-
-    this->Front = SnazzCraft::CalculateFrontVector(this->Rotation, true);
+    this->Front = SnazzCraft::CalculateFrontVector(IRotation, true);
 }
 
 SnazzCraft::Entity::~Entity()
 {
-    delete this->EntityMesh;
-    delete this->EntityHitbox;
+    
 }
 
 void SnazzCraft::Entity::Move(const glm::vec3& AdditionalRotation, float Distance)
 {
-    MoveVector3D(this->Position, this->Rotation + AdditionalRotation, Distance);
-
-    if (this->EntityHitbox != nullptr) this->EntityHitbox->Position = this->Position + this->HitboxOffset;
+    SnazzCraft::MoveVector3D(this->Position, this->Rotation + AdditionalRotation, Distance);
 }
 
 void SnazzCraft::Entity::Rotate(const glm::vec3& AdditionalRotation)

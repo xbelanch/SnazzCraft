@@ -21,7 +21,7 @@ void SnazzCraft::World::GenerateChunk(uint32_t X, uint32_t Z, bool ApplyLighting
     }
 
     if (!UpdatedChunk) {
-        NewChunk->UpdateLightingOnVertices();
+        NewChunk->UpdateLightingOnVertices(this->Chunks, this->Size);
         NewChunk->UpdateMesh();
     }
 }

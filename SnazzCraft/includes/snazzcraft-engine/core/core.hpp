@@ -29,6 +29,7 @@
 #include "../gui/world-gui.hpp"
 #include "window.hpp"
 #include "../hitbox/hitbox.hpp"
+#include "snazzcraft-engine/entity/entity-type.hpp"
 
 #ifdef _WIN32
     #define CLEAR_COMMAND "cls"

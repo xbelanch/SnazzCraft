@@ -2,6 +2,10 @@
 
 #include <vector>
 #include <stdint.h>
+#include <fstream>
+#include <sstream>
+#include <iostream>
+#include <string>
 
 #include "../../glm/glm.hpp"
 #include "../../glad.h"
@@ -31,6 +35,10 @@ namespace SnazzCraft
         uint32_t EBO;
 
         void Initiate();
+
+    public:
+        static SnazzCraft::Mesh* LoadMeshFromObjectFile(const char* FilePath);
+
     };
 
     extern SnazzCraft::Mesh* VoxelMesh;

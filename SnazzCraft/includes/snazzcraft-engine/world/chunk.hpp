@@ -36,8 +36,6 @@ namespace SnazzCraft
 
         std::unordered_map<uint32_t, SnazzCraft::Voxel> Voxels; // Voxel positioning is in local chunk space
         std::unordered_map<uint32_t, int> LightValues;
-        std::vector<SnazzCraft::Entity*> Entities;
-
         Chunk(int32_t X, int32_t Y); // Chunk Coordinates 
 
         ~Chunk();
@@ -50,13 +48,13 @@ namespace SnazzCraft
 
         bool VoxelTouchingChunkBorder(uint32_t VoxelIndex, uint32_t* BorderDirection) const;
 
-        SnazzCraft::Voxel* GetCollidingVoxel(const SnazzCraft::Hitbox* Hitbox); // Returns nullptr if no collision
+        SnazzCraft::Voxel* GetCollidingVoxel(const glm::vec3& Position, const SnazzCraft::Hitbox* Hitbox); // Returns nullptr if no collision
 
         SnazzCraft::Voxel* GetCollidingVoxel(const glm::vec3& Position);
 
-        SnazzCraft::Voxel* GetCollidingVoxel(const SnazzCraft::Hitbox* Hitbox, int32_t LocalVoxelX, int32_t LocalVoxelY, int32_t LocalVoxelZ);
+        SnazzCraft::Voxel* GetCollidingVoxel(const glm::vec3& Position, const SnazzCraft::Hitbox* Hitbox, int32_t LocalVoxelX, int32_t LocalVoxelY, int32_t LocalVoxelZ);
 
-        void UpdateLightingOnVertices();
+        void UpdateLightingOnVertices(const std::unordered_map<uint32_t, SnazzCraft::Chunk*>& Chunks, uint32_t WorldSize);
 
         inline void UpdateMesh()
         {

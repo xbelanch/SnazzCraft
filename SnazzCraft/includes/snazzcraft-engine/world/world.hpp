@@ -45,16 +45,17 @@ namespace SnazzCraft
         float PlayerReach = static_cast<float>(SnazzCraft::Voxel::Size * 5);
 
         std::unordered_map<uint32_t, SnazzCraft::Chunk*> Chunks;
+        std::vector<SnazzCraft::Entity*> Entities;
 
         World(std::string IName, uint32_t ISize, int32_t ISeed);
 
         ~World();
 
-        void GenerateChunk(uint32_t X, uint32_t Z, bool ApplyLighting); // Thread safe
+        void GenerateChunk(uint32_t X, uint32_t Z, bool ApplyLighting); 
 
-        void RenderChunks(SnazzCraft::User* Player); // Thread safe
+        void Render() const;
 
-        SnazzCraft::Voxel* GetCollidingVoxel(const SnazzCraft::Hitbox* Hitbox) const; // Returns nullptr if no collision 
+        SnazzCraft::Voxel* GetCollidingVoxel(const glm::vec3& Position, const SnazzCraft::Hitbox* Hitbox) const; // Returns nullptr if no collision 
 
         SnazzCraft::Voxel* GetCollidingVoxel(const glm::vec3& Position) const; // Returns nullptr if no collision - Position should be in world space
 
@@ -64,17 +65,12 @@ namespace SnazzCraft
 
         bool SaveWorldToFile(bool OverwriteExistingFile) const;
 
-        inline void ApplyGravityToEntities(std::vector<SnazzCraft::Entity*> AdditionalEntities)
+        inline void ApplyGravityToAllEntities()
         {
             constexpr float MoveDistance = 0.2f;
 
-            for (auto& ChunkPair : this->Chunks) {
-                for (SnazzCraft::Entity* Entity : ChunkPair.second->Entities) {
-                    this->MoveEntity(glm::vec3(0.0f, -MoveDistance, 0.0f), Entity);
-                }
-            }
-
-            for (SnazzCraft::Entity* Entity : AdditionalEntities) {
+            this->MoveEntity(glm::vec3(0.0f, -MoveDistance, 0.0f), SnazzCraft::Player);
+            for (SnazzCraft::Entity* Entity : this->Entities) {
                 this->MoveEntity(glm::vec3(0.0f, -MoveDistance, 0.0f), Entity);
             }
         }
@@ -91,11 +87,6 @@ namespace SnazzCraft
         bool PlaceVoxel(const glm::vec3& Position, const glm::vec3& Rotation, uint8_t VoxelID);
 
         void UpdateVoxelPlacementDisplayPosition();
-
-        inline void RenderVoxelPlacementDisplayPosition() const 
-        {
-            this->VoxelPlacementDisplayMesh->Draw();
-        }
 
         inline const glm::vec3& GetVoxelPlacementDisplayPosition() const
         {
@@ -125,6 +116,10 @@ namespace SnazzCraft
         SnazzCraft::Mesh* VoxelPlacementDisplayMesh = nullptr;
         glm::vec3 VoxelPlacementDisplayPosition;
         bool RenderVoxelPlacementDisplay = false;
+
+        void RenderEntities() const;
+
+        void RenderChunks() const;
 
         /*
         Rotation is expected to not be normalized

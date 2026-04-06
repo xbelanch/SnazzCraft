@@ -15,8 +15,10 @@ SnazzCraft::World::LightNode::LightNode(int8_t ILightValue, int32_t IPosition[3]
 void SnazzCraft::World::UpdateChunkLighting(SnazzCraft::Chunk* Chunk, bool* UpdatedInputChunk)
 {
     Chunk->LightValues.clear();
-
     std::unordered_set<uint32_t> ChunksToUpdate;
+
+    this->ApplySunLightingToChunk(Chunk, ChunksToUpdate);
+
     for (const auto& VoxelPair : Chunk->Voxels) {
         int32_t LightProducingLevel = VoxelPair.second.GetVoxelType().LightProducingLevel;
         if (LightProducingLevel <= 0) continue;
@@ -28,13 +30,12 @@ void SnazzCraft::World::UpdateChunkLighting(SnazzCraft::Chunk* Chunk, bool* Upda
         };
         this->ApplyLightingVoxel(Position, LightProducingLevel, ChunksToUpdate);
     }
-    this->ApplySunLightingToChunk(Chunk, ChunksToUpdate);
     
     for (uint32_t I : ChunksToUpdate) {
         auto ChunkIterator = this->Chunks.find(I);
         if (ChunkIterator == this->Chunks.end()) { continue; }
 
-        ChunkIterator->second->UpdateLightingOnVertices();
+        ChunkIterator->second->UpdateLightingOnVertices(this->Chunks, this->Size);
         ChunkIterator->second->UpdateMesh();
     }
 
@@ -55,19 +56,21 @@ void SnazzCraft::World::ApplySunLightingToChunk(SnazzCraft::Chunk* Chunk, std::u
 
 void SnazzCraft::World::ApplySunLightingToColumn(SnazzCraft::Chunk* Chunk, uint32_t LocalChunkX, uint32_t LocalChunkZ)
 {
+    int LightValue = 15;
     for (uint32_t Y = SnazzCraft::Chunk::Height; Y > 0; Y--) {
         uint32_t LightY = Y - 1;
         uint32_t LocalIndex = SnazzCraft::Chunk::LocalVoxelIndex(LocalChunkX, LightY, LocalChunkZ);
 
         auto LightIterator = Chunk->LightValues.find(LocalIndex);
         if (LightIterator == Chunk->LightValues.end()) {
-            Chunk->LightValues.insert_or_assign(LocalIndex, 15); // Sunlight is light level 15    
+            Chunk->LightValues.insert_or_assign(LocalIndex, LightValue); // Sunlight is light level 15    
         } else {
-            LightIterator->second = LightIterator->second >= 15 ? LightIterator->second : 15;
+            LightIterator->second = LightIterator->second >= LightValue ? LightIterator->second : LightValue;
         }
 
         auto VoxelIterator = Chunk->Voxels.find(LocalIndex);
-        if (VoxelIterator != Chunk->Voxels.end()) break;
+        if (VoxelIterator != Chunk->Voxels.end()) LightValue -= VoxelIterator->second.GetVoxelType().LightPropogationDecrease;
+        if (LightValue <= 1) break;
     }
 }
 

@@ -7,7 +7,7 @@ const SnazzCraft::VoxelType& SnazzCraft::VoxelType::GetVoxelType(uint8_t VoxelID
     static const SnazzCraft::VoxelType Phantom(0, 0, 0x00, false, false);
     static const SnazzCraft::VoxelType VoxelCollidable(0, 0, 0x00, false, true);
     static const SnazzCraft::VoxelType Torch(18, 0, 0x00, false, true);
-    static const SnazzCraft::VoxelType Water(0, 1, 0x3F, true, false);
+    static const SnazzCraft::VoxelType Water(0, 2, 0x3F, true, false);
     static const SnazzCraft::VoxelType FullSolid(0, SnazzCraft::Voxel::MaxLightValue, 0x3F, true, true);
 
     switch (VoxelID)

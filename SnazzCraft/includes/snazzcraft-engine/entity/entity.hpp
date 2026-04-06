@@ -5,6 +5,8 @@
 #include "../mesh/mesh.hpp"
 #include "../utilities/math.hpp"
 #include "../hitbox/hitbox.hpp"
+#include "snazzcraft-engine/entity/entity-ids.h"
+#include "snazzcraft-engine/entity/entity-type.hpp"
 
 namespace SnazzCraft
 {
@@ -15,21 +17,19 @@ namespace SnazzCraft
         glm::vec3 Rotation;
         glm::vec3 Front;
 
-        SnazzCraft::Mesh* EntityMesh = nullptr;
-        SnazzCraft::Hitbox* EntityHitbox = nullptr;
-        glm::vec3 HitboxOffset = glm::vec3(0.0f);
+        uint8_t ID;
 
-        Entity(glm::vec3 Position, glm::vec3 Rotation);
+        Entity(glm::vec3 IPosition, glm::vec3 IRotation, uint8_t IID);
+
         virtual ~Entity();
 
         virtual void Move(const glm::vec3& AdditionalRotation, float Distance);
 
         virtual void Rotate(const glm::vec3& AdditionalRotation);
 
-        inline void SetHitbox(const glm::vec3& Dimensions)
+        inline const SnazzCraft::EntityType& GetEntityType()
         {
-            delete this->EntityHitbox;
-            this->EntityHitbox = new SnazzCraft::Hitbox(this->Position, Dimensions);
+            return SnazzCraft::EntityType::GetEntityType(this->ID);
         }
 
     private:

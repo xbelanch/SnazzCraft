@@ -9,6 +9,19 @@ bool SnazzCraft::World::DestroyVoxel(const glm::vec3& Position, const glm::vec3&
 
 bool SnazzCraft::World::PlaceVoxel(const glm::vec3& Position, const glm::vec3& Rotation, uint8_t VoxelID)
 {
+    auto CollidedWithEntity = [this](uint32_t NewlyPlacedVoxelIndex) -> bool
+    {
+        SnazzCraft::Voxel* CollidingVoxel = this->GetCollidingVoxel(SnazzCraft::Player->Position, SnazzCraft::Player->GetEntityType().EntityHitbox);
+            if (CollidingVoxel != nullptr && SnazzCraft::Chunk::LocalVoxelIndex(*CollidingVoxel) == NewlyPlacedVoxelIndex) return true;
+
+        for (SnazzCraft::Entity* Entity : this->Entities) {
+            SnazzCraft::Voxel* CollidingVoxel = this->GetCollidingVoxel(Entity->Position, Entity->GetEntityType().EntityHitbox);
+            if (CollidingVoxel != nullptr && SnazzCraft::Chunk::LocalVoxelIndex(*CollidingVoxel) == NewlyPlacedVoxelIndex) return true;
+        }
+
+        return false;
+    };
+
     glm::vec3 EndPosition = Position;
     uint8_t FaceHit;
     SnazzCraft::Voxel* VoxelHit;
@@ -26,8 +39,7 @@ bool SnazzCraft::World::PlaceVoxel(const glm::vec3& Position, const glm::vec3& R
     uint32_t LocalPlaceVoxelIndex = SnazzCraft::Chunk::LocalVoxelIndex(NewPlacePosition[0], NewPlacePosition[1], NewPlacePosition[2]);
     ChunkIterator->second->Voxels.insert_or_assign(LocalPlaceVoxelIndex, SnazzCraft::Voxel(static_cast<uint8_t>(NewPlacePosition[0]), static_cast<uint8_t>(NewPlacePosition[1]), static_cast<uint8_t>(NewPlacePosition[2]), VoxelID));
 
-    SnazzCraft::Voxel* CollidingVoxel = this->GetCollidingVoxel(SnazzCraft::Player->EntityHitbox);
-    if (CollidingVoxel != nullptr && SnazzCraft::Chunk::LocalVoxelIndex(*CollidingVoxel) == LocalPlaceVoxelIndex) { ChunkIterator->second->Voxels.erase(LocalPlaceVoxelIndex); return false; }
+    if (CollidedWithEntity(LocalPlaceVoxelIndex)) { ChunkIterator->second->Voxels.erase(LocalPlaceVoxelIndex); return false; }
 
     ChunkIterator->second->CullVoxelFaces();
     ChunkIterator->second->UpdateVerticesAndIndices();

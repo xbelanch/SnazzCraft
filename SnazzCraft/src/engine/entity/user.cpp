@@ -1,21 +1,15 @@
 #include "snazzcraft-engine/entity/user.hpp"
 
-const glm::vec3 UserHitboxDimensions = glm::vec3(1.75f, 5.75f, 1.75f);
-
 SnazzCraft::User* SnazzCraft::Player = new SnazzCraft::User({ -5.0f, 70.0f, -50.0f }, { 0.0f, 0.0f, 0.0f });
 
-SnazzCraft::User::User(glm::vec3 Position, glm::vec3 Rotation) : SnazzCraft::Entity(Position, Rotation)
+SnazzCraft::User::User(glm::vec3 Position, glm::vec3 Rotation) : SnazzCraft::Entity(Position, Rotation, ID_ENTITY_PLAYER)
 {
-    this->SetHitbox(UserHitboxDimensions);
+  
 }
 
 void SnazzCraft::User::Move(const glm::vec3& AdditionalRotation, float Distance) 
 {
-    float PreviousY = this->Position.y;
-    MoveVector3D(this->Position, this->Rotation + AdditionalRotation, Distance);
-    this->Position.y = PreviousY;
-    
-    if (this->EntityHitbox != nullptr) this->EntityHitbox->Position = this->Position + this->HitboxOffset;
+    SnazzCraft::MoveVector3D(this->Position, { this->Rotation.x + AdditionalRotation.x, this->Rotation.y + AdditionalRotation.y, 0.0f }, Distance);
 }
 
 void SnazzCraft::User::Rotate(const glm::vec3& AdditionalRotation) 

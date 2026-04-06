@@ -16,26 +16,15 @@ SnazzCraft::World::~World()
         delete ChunkPair.second;
     }
 
+    for (SnazzCraft::Entity* Entity : this->Entities) {
+        delete Entity;
+    }
+
     delete this->WorldHeightMap;
+    delete this->VoxelPlacementDisplayMesh;
 }
 
-void SnazzCraft::World::RenderChunks(SnazzCraft::User* Player)
-{ 
-    int32_t PlayerChunkPosition[2];
-    SnazzCraft::Chunk::GetChunkPosition(Player->Position, PlayerChunkPosition);
 
-    for (int32_t X = PlayerChunkPosition[0] - static_cast<int32_t>(this->RenderDistance); X <= PlayerChunkPosition[0] + static_cast<int32_t>(this->RenderDistance); X++) {
-    for (int32_t Z = PlayerChunkPosition[1] - static_cast<int32_t>(this->RenderDistance); Z <= PlayerChunkPosition[1] + static_cast<int32_t>(this->RenderDistance); Z++) {
-        if (X < 0 || X >= static_cast<int32_t>(this->Size) || Z < 0 || Z >= static_cast<int32_t>(this->Size)) continue;
-
-        auto ChunkIterator = this->Chunks.find(INDEX_2D(X, Z, static_cast<int32_t>(this->Size)));
-        if (ChunkIterator == this->Chunks.end()) continue;
-
-        if (ChunkIterator->second->ChunkMesh == nullptr) continue; 
-        ChunkIterator->second->ChunkMesh->Draw();
-    }
-    }
-}
 
 
 
