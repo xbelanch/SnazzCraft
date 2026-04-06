@@ -1,0 +1,3 @@
+textures/solids/light-green.png
+textures/solids/dark-blue.png
+textures/solids/white.png

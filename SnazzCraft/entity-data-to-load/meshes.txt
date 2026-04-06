@@ -1,0 +1,3 @@
+entity-meshes/test-cube.obj
+entity-meshes/test-rectangular-prism.obj
+entity-meshes/cattle.obj

@@ -1,73 +1,51 @@
 #include "snazzcraft-engine/entity/entity-type.hpp"
 
-const char* TexturesToIntialize[] = {
-    "textures/solids/light-green.png",
-    "textures/solids/dark-blue.png",
-    "textures/solids/white.png",
-    nullptr
-};
-SnazzCraft::Texture* Textures[256];
-uint8_t TexturesSet = 0x00;
+SnazzCraft::Mesh* SnazzCraft::EntityType::Meshes[256];
+uint8_t SnazzCraft::EntityType::MeshesLoaded = 0x00;
+#define MESH_TEST_CUBE              (0x00)
+#define MESH_TEST_RECTANGULAR_PRISM (0x01)
+#define MESH_CATTLE                 (0x02)
 
-const char* MeshesToInitialize[] = {
-    "entity-meshes/test-cube.obj",
-    "entity-meshes/test-rectangular-prism.obj",
-    "entity-meshes/cattle.obj",
-    nullptr
-};
-SnazzCraft::Mesh* Meshes[256];
-uint8_t MeshesSet = 0x00;
+SnazzCraft::Texture* SnazzCraft::EntityType::Textures[256];
+uint8_t SnazzCraft::EntityType::TexturesLoaded = 0x00;
+#define TEXTURE_LIGHT_GREEN (0x00)
+#define TEXTURE_DARK_BLUE   (0x01)
+#define TEXTURE_WHITE       (0x02)
 
-const glm::vec3 HumanoidHitboxDimensions = glm::vec3(1.75f, 5.75f, 1.75f);
-SnazzCraft::Hitbox* HumanoidHitbox;
-
-const glm::vec3 CattleHitboxDimensions = glm::vec3(1.75f, 0.75f, 1.75f);
-SnazzCraft::Hitbox* CattleHitbox;
+SnazzCraft::Hitbox* SnazzCraft::EntityType::Hitboxes[256];
+uint8_t SnazzCraft::EntityType::HitboxesLoaded = 0x00;
+#define HITBOX_HUMANONOID (0x00)
+#define HITBOX_CATTLE     (0x01)
 
 void SnazzCraft::EntityType::Initialize()
 {
-    uint8_t TextureToIntializeIndex = 0x00;
-    while (TexturesToIntialize[TextureToIntializeIndex] != nullptr)
-    {
-        Textures[TextureToIntializeIndex] = new SnazzCraft::Texture(TexturesToIntialize[TextureToIntializeIndex]);
+    SnazzCraft::EntityType::LoadMeshes();
+    SnazzCraft::EntityType::LoadTextures();
+    SnazzCraft::EntityType::LoadHitboxes();
 
-        TextureToIntializeIndex++;
-        TexturesSet++;
-    }
-
-    uint8_t MeshesToInitializeIndex = 0x00;
-    while (MeshesToInitialize[MeshesToInitializeIndex] != nullptr)
-    {
-        Meshes[MeshesToInitializeIndex] = SnazzCraft::Mesh::LoadMeshFromObjectFile(MeshesToInitialize[MeshesToInitializeIndex]);
-
-        MeshesToInitializeIndex++;
-        MeshesSet++;
-    }
-
-    HumanoidHitbox = new SnazzCraft::Hitbox(HumanoidHitboxDimensions);
-    CattleHitbox = new SnazzCraft::Hitbox(CattleHitboxDimensions);
-    Meshes[2]->ScaleVector = glm::vec3(0.5f);
+    Meshes[MESH_CATTLE]->ScaleVector = glm::vec3(0.5f);
 }
 
 void SnazzCraft::EntityType::FreeResources()
 {
-    for (uint8_t I = 0x00; I < TexturesSet; I++) {
-        delete Textures[I];
-    }
-
-    for (uint8_t I = 0x00; I < MeshesSet; I++) {
+    for (uint8_t I = 0x00; I < SnazzCraft::EntityType::MeshesLoaded; I++) {
         delete Meshes[I];
     }
 
-    delete HumanoidHitbox;
-    delete CattleHitbox;
+    for (uint8_t I = 0x00; I < SnazzCraft::EntityType::TexturesLoaded; I++) {
+        delete Textures[I];
+    }
+
+    for (uint8_t I = 0x00; I < SnazzCraft::EntityType::HitboxesLoaded; I++) {
+        delete SnazzCraft::EntityType::Hitboxes[I];
+    }
 }
 
 const SnazzCraft::EntityType& SnazzCraft::EntityType::GetEntityType(uint8_t ID)
 {
-    static const SnazzCraft::EntityType Player(Meshes[0], Textures[0], HumanoidHitbox);
-    static const SnazzCraft::EntityType Test(Meshes[1], Textures[1], HumanoidHitbox);
-    static const SnazzCraft::EntityType Sheep(Meshes[2], Textures[2], CattleHitbox);
+    static const SnazzCraft::EntityType Player(Meshes[MESH_TEST_RECTANGULAR_PRISM], Textures[TEXTURE_LIGHT_GREEN], SnazzCraft::EntityType::Hitboxes[HITBOX_HUMANONOID]);
+    static const SnazzCraft::EntityType Test  (Meshes[MESH_TEST_RECTANGULAR_PRISM], Textures[TEXTURE_DARK_BLUE],   SnazzCraft::EntityType::Hitboxes[HITBOX_HUMANONOID]);
+    static const SnazzCraft::EntityType Sheep (Meshes[MESH_CATTLE],                 Textures[TEXTURE_WHITE],       SnazzCraft::EntityType::Hitboxes[HITBOX_CATTLE]);
 
     switch (ID)
     {
@@ -89,4 +67,57 @@ SnazzCraft::EntityType::EntityType(SnazzCraft::Mesh* IEntityMesh, SnazzCraft::Te
     : EntityMesh(IEntityMesh), EntityTexture(IEntityTexture), EntityHitbox(IEntityHitbox)
 {
 
+}
+
+void SnazzCraft::EntityType::LoadMeshes()
+{
+    std::ifstream ListFile("entity-data-to-load/meshes.txt");
+    if (!ListFile.is_open()) throw std::runtime_error("SNAZZCRAFT| Unable to open entity mesh list file\n");
+
+    std::string ObjectFileToLoad;
+    while (std::getline(ListFile, ObjectFileToLoad))
+    {
+        SnazzCraft::EntityType::Meshes[SnazzCraft::EntityType::MeshesLoaded++] = SnazzCraft::Mesh::LoadMeshFromObjectFile(ObjectFileToLoad.c_str());
+    }
+
+    ListFile.close();
+}
+
+void SnazzCraft::EntityType::LoadTextures()
+{
+    std::ifstream ListFile("entity-data-to-load/textures.txt");
+    if (!ListFile.is_open()) throw std::runtime_error("SNAZZCRAFT| Unable to open entity texture list file\n");
+
+    std::string TextureToLoad;
+    while (std::getline(ListFile, TextureToLoad))
+    {
+        SnazzCraft::EntityType::Textures[SnazzCraft::EntityType::TexturesLoaded++] = new SnazzCraft::Texture(TextureToLoad.c_str());
+    }
+
+    ListFile.close();
+}
+
+void SnazzCraft::EntityType::LoadHitboxes()
+{
+    std::ifstream ListFile("entity-data-to-load/hitbox-dimensions.txt");
+    if (!ListFile.is_open()) throw std::runtime_error("SNAZZCRAFT| Unable to open entity hitbox dimensions list file\n");
+
+    char Space = ' ';
+    std::string Line;
+    float NewDimensions[3];
+    while (std::getline(ListFile, Line))
+    {
+        uint32_t LineIndex = 0;
+        for (uint8_t I = 0x00; I < 0x03; I++) {
+            std::string NewValue;
+            SnazzCraft::ParseData(NewValue, Line, LineIndex, &Space);
+
+            NewDimensions[I] = std::stof(NewValue);
+            LineIndex++;
+        }
+
+        SnazzCraft::EntityType::Hitboxes[SnazzCraft::EntityType::HitboxesLoaded++] = new SnazzCraft::Hitbox({ NewDimensions[0], NewDimensions[1], NewDimensions[2] });
+    }
+
+    ListFile.close();
 }
