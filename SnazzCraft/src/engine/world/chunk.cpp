@@ -221,7 +221,7 @@ void SnazzCraft::Chunk::UpdateLightingOnVertices(SnazzCraft::World* World)
         if (CheckX < 0) { 
             CheckX += SnazzCraft::Chunk::Width; 
             TargetChunkX--; 
-        } else if (CheckX >= static_cast<int32_t>(SnazzCraft::Chunk::Width)) { 
+        } else if (CheckX >= SnazzCraft::Chunk::Width) { 
             CheckX -= SnazzCraft::Chunk::Width; 
             TargetChunkX++; 
         }
@@ -229,7 +229,7 @@ void SnazzCraft::Chunk::UpdateLightingOnVertices(SnazzCraft::World* World)
         if (CheckZ < 0) { 
             CheckZ += SnazzCraft::Chunk::Depth; 
             TargetChunkZ--; 
-        } else if (CheckZ >= static_cast<int32_t>(SnazzCraft::Chunk::Depth)) { 
+        } else if (CheckZ >= SnazzCraft::Chunk::Depth) { 
             CheckZ -= SnazzCraft::Chunk::Depth; 
             TargetChunkZ++; 
         }
