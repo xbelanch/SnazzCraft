@@ -44,3 +44,17 @@ SnazzCraft::World* SnazzCraft::World::CreateWorld(std::string Name, uint32_t Siz
     
     return NewWorld;
 }
+
+void SnazzCraft::World::UpdateChunkVerticeLightingAndMesh(uint32_t Index)
+{
+    auto ChunkIterator = this->Chunks.find(Index);
+    if (ChunkIterator == this->Chunks.end()) return;
+
+    this->UpdateChunkVerticeLightingAndMesh(ChunkIterator->second);
+}
+
+void SnazzCraft::World::UpdateChunkVerticeLightingAndMesh(SnazzCraft::Chunk* Chunk)
+{
+    Chunk->UpdateLightingOnVertices(this);
+    Chunk->UpdateMesh();
+}

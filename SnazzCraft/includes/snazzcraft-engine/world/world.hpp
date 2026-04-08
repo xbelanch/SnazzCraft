@@ -124,15 +124,19 @@ namespace SnazzCraft
         */
         bool RaycastToVoxel(glm::vec3& Position, const glm::vec3& Rotation, float MaxDistance, uint8_t* FaceHit, SnazzCraft::Voxel** VoxelHit); 
 
-        void ApplySunLightingToChunk(SnazzCraft::Chunk* Chunk, std::unordered_set<uint32_t>& ChunksToUpdate);
+        void ApplySunLightingToChunk(SnazzCraft::Chunk* Chunk, std::unordered_set<uint32_t>* ChunksToUpdate);
 
-        void ApplySunLightingToColumn(SnazzCraft::Chunk* Chunk, uint32_t LocalChunkX, uint32_t LocalChunkZ);
+        void ApplySunLightingToColumn(SnazzCraft::Chunk* Chunk, uint32_t LocalChunkX, uint32_t LocalChunkZ, uint32_t StartY, int32_t StartLightValue, std::unordered_set<uint32_t>* ChunksToUpdate);
         
         /*
         Only to be called trough UpdateChunkLighting
         Generates currently ungenerated Chunks when light values would affect them
         */
-        void ApplyLightingVoxel(int32_t LightOrigin[3], int32_t LightProducingLevel, std::unordered_set<uint32_t>& ChunksToUpdate);
+        void ApplyLightingVoxel(int32_t LightOrigin[3], int32_t LightProducingLevel, std::unordered_set<uint32_t>* ChunksToUpdate);
+
+        void UpdateChunkVerticeLightingAndMesh(uint32_t Index);
+
+        void UpdateChunkVerticeLightingAndMesh(SnazzCraft::Chunk* Chunk);
         
     public:
         static SnazzCraft::World* CreateWorld(std::string Name, uint32_t Size, int32_t Seed);
