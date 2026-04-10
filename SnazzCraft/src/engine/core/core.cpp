@@ -236,7 +236,7 @@ void RenderWorld()
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
     
-    SnazzCraft::CurrentWorld->UpdateVoxelPlacementDisplayPosition();
+    SnazzCraft::CurrentWorld->UpdateVoxelPlacementDisplay();
     SnazzCraft::CurrentWorld->Render();
 }
 

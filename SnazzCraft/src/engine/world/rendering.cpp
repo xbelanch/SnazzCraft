@@ -14,17 +14,13 @@ void SnazzCraft::World::Render() const
     glUniformMatrix4fv(SnazzCraft::ModelLock, 1, GL_FALSE, glm::value_ptr(SnazzCraft::ModelMatrix));
     this->RenderChunks();
 
-    if (this->RenderVoxelPlacementDisplay) {
-        SnazzCraft::ModelMatrix = glm::translate(glm::mat4(1.0f), this->VoxelPlacementDisplayPosition);
-        glUniformMatrix4fv(SnazzCraft::ModelLock, 1, GL_FALSE, glm::value_ptr(SnazzCraft::ModelMatrix));
-        this->VoxelPlacementDisplayMesh->Draw();
-    }
+    this->RenderVoxelPlacementDisplay();
     
     // Render entities
-    this->RenderEntities();
+    this->RenderAllEntities();
 }
 
-void SnazzCraft::World::RenderEntities() const
+void SnazzCraft::World::RenderAllEntities() const
 {
     auto RenderEntity = [](SnazzCraft::Entity* Entity) -> void
     {
@@ -66,3 +62,14 @@ void SnazzCraft::World::RenderChunks() const
     }
     }
 }
+
+void SnazzCraft::World::RenderVoxelPlacementDisplay() const
+{
+    if (!this->ShouldRenderVoxelPlacementDisplay) return;
+
+    SnazzCraft::ModelMatrix = glm::translate(glm::mat4(1.0f), this->VoxelPlacementDisplayPosition);
+    SnazzCraft::ModelMatrix = glm::scale(SnazzCraft::ModelMatrix, this->VoxelPlacementDisplayMesh->ScaleVector);
+    glUniformMatrix4fv(SnazzCraft::ModelLock, 1, GL_FALSE, glm::value_ptr(SnazzCraft::ModelMatrix));
+    this->VoxelPlacementDisplayMesh->Draw();
+}
+

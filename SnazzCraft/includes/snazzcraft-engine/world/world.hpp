@@ -84,12 +84,12 @@ namespace SnazzCraft
 
         bool PlaceVoxel(const glm::vec3& Position, const glm::vec3& Rotation, uint8_t VoxelID);
 
-        void UpdateVoxelPlacementDisplayPosition();
+        void UpdateVoxelPlacementDisplay();
 
         inline const glm::vec3& GetVoxelPlacementDisplayPosition() const
         {
-            const glm::vec3 DefaultReturnPosition(-100.0f, -100.0f, -100.0f);
-            return this->RenderVoxelPlacementDisplay ? this->VoxelPlacementDisplayPosition : DefaultReturnPosition;
+            static const glm::vec3 DefaultReturnPosition(-100.0f, -100.0f, -100.0f);
+            return this->ShouldRenderVoxelPlacementDisplay ? this->VoxelPlacementDisplayPosition : DefaultReturnPosition;
         }
 
     private:
@@ -113,11 +113,13 @@ namespace SnazzCraft
         SnazzCraft::HeightMap* WorldHeightMap = nullptr;
         SnazzCraft::Mesh* VoxelPlacementDisplayMesh = nullptr;
         glm::vec3 VoxelPlacementDisplayPosition;
-        bool RenderVoxelPlacementDisplay = false;
+        bool ShouldRenderVoxelPlacementDisplay = false;
 
-        void RenderEntities() const;
+        void RenderAllEntities() const;
 
         void RenderChunks() const;
+
+        void RenderVoxelPlacementDisplay() const;
 
         /*
         Rotation is expected to not be normalized

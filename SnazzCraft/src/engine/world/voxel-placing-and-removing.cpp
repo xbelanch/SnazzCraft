@@ -70,29 +70,29 @@ bool SnazzCraft::World::PlaceVoxel(const glm::vec3& Position, const glm::vec3& R
     return true;
 }
 
-void SnazzCraft::World::UpdateVoxelPlacementDisplayPosition()
+void SnazzCraft::World::UpdateVoxelPlacementDisplay()
 {
     glm::vec3 EndPosition = SnazzCraft::Player->Position;
     uint8_t FaceHit;
     SnazzCraft::Voxel* VoxelHit = nullptr;
 
     this->RaycastToVoxel(EndPosition, SnazzCraft::Player->Rotation, this->PlayerReach, &FaceHit, &VoxelHit);
-    if (VoxelHit == nullptr) { this->RenderVoxelPlacementDisplay = false; return; }
+    if (VoxelHit == nullptr) { this->ShouldRenderVoxelPlacementDisplay = false; return; }
 
-    int8_t NewPlacePosition[3];
+    glm::vec3 VoxelSpaceEndPosition = EndPosition / glm::vec3(SnazzCraft::Voxel::Size);
     int32_t ChunkCoordinates[2];
-    if (!GetNewPlacePosition(EndPosition, FaceHit, VoxelHit, NewPlacePosition, ChunkCoordinates)) { this->RenderVoxelPlacementDisplay = false; return; }
+    SnazzCraft::Chunk::GetChunkPosition(VoxelSpaceEndPosition, ChunkCoordinates);
 
     auto ChunkIterator = this->Chunks.find(SnazzCraft::Index2D(ChunkCoordinates[0], ChunkCoordinates[1], static_cast<int32_t>(this->Size)));
-    if (ChunkIterator == this->Chunks.end() || ChunkCoordinates[0] < 0 || ChunkCoordinates[1] < 0 || ChunkCoordinates[0] >= static_cast<int32_t>(this->Size) || ChunkCoordinates[1] >= static_cast<int32_t>(this->Size)) { this->RenderVoxelPlacementDisplay = false; return; }
+    if (ChunkIterator == this->Chunks.end() || ChunkCoordinates[0] < 0 || ChunkCoordinates[1] < 0 || ChunkCoordinates[0] >= static_cast<int32_t>(this->Size) || ChunkCoordinates[1] >= static_cast<int32_t>(this->Size)) { this->ShouldRenderVoxelPlacementDisplay = false; return; }
 
     this->VoxelPlacementDisplayPosition = glm::vec3(
-        (static_cast<float>(ChunkIterator->second->Position[0] * SnazzCraft::Chunk::Width) + NewPlacePosition[0]) * SnazzCraft::Voxel::Size,
-        (static_cast<float>(NewPlacePosition[1])) * SnazzCraft::Voxel::Size,
-        (static_cast<float>(ChunkIterator->second->Position[1] * SnazzCraft::Chunk::Depth) + NewPlacePosition[2]) * SnazzCraft::Voxel::Size
+        (static_cast<float>(ChunkIterator->second->Position[0] * SnazzCraft::Chunk::Width) + VoxelHit->X) * SnazzCraft::Voxel::Size,
+        (static_cast<float>(VoxelHit->Y) * SnazzCraft::Voxel::Size),
+        (static_cast<float>(ChunkIterator->second->Position[1] * SnazzCraft::Chunk::Depth) + VoxelHit->Z) * SnazzCraft::Voxel::Size
     );
 
-    this->RenderVoxelPlacementDisplay = true;
+    this->ShouldRenderVoxelPlacementDisplay = true;
 }
 
 bool SnazzCraft::World::RaycastToVoxel(glm::vec3& Position, const glm::vec3& Rotation, float MaxDistance, uint8_t* FaceHit, SnazzCraft::Voxel** VoxelHit)
