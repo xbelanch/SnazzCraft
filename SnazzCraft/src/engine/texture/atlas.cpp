@@ -96,7 +96,7 @@ std::vector<SnazzCraft::VoxelVertice> SnazzCraft::VoxelTextureApplier::GetTextur
     return Vertices;
 }
 
-bool SnazzCraft::VoxelTextureApplier::LoadAtlasCoordinates(const char* AtlasFilePath)
+void SnazzCraft::VoxelTextureApplier::LoadAtlasCoordinates(const char* AtlasFilePath)
 {
     std::ifstream File(AtlasFilePath);
     std::string Line;
@@ -113,6 +113,4 @@ bool SnazzCraft::VoxelTextureApplier::LoadAtlasCoordinates(const char* AtlasFile
     }
 
     File.close();
-
-    return true;
 }

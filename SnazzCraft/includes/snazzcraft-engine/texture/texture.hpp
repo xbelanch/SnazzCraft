@@ -3,6 +3,7 @@
 #include <fstream>
 #include <string>
 #include <iostream>
+#include <stdint.h>
 
 #include "glad.h"
 #include "stb_image.h"
@@ -16,25 +17,29 @@ namespace SnazzCraft
     class Texture
     {
     public:
-        unsigned char* Data = nullptr;
-        int Dimensions[2] = { 0, 0 };
-        int NRChannels = 4;
-        unsigned int* ID = nullptr;
+        union 
+        {
+            struct 
+            {
+                int32_t Width, Height;
+            };
+            int32_t Dimensions[2];
+        };
 
-        unsigned int WrapS = GL_REPEAT;
-        unsigned int WrapT = GL_REPEAT;
+        uint8_t* Data = nullptr;
+        int32_t NRChannels = 4;
+        uint32_t* ID = nullptr;
 
-        Texture();
+        uint32_t WrapS = GL_REPEAT;
+        uint32_t WrapT = GL_REPEAT;
 
-        Texture(const char* FilePath);
+        Texture(std::string FilePath);
 
-        ~Texture();
+        virtual ~Texture();
 
-        void LoadTexture(const char* FilePath);
+        void LoadTexture(std::string FilePath);
 
-        void CreateTextureFromString(std::string Text, unsigned char R, unsigned char G, unsigned char B);
-
-        inline bool BindTexture() const
+        virtual inline bool BindTexture() const
         {
             if (this->ID == nullptr) return false;
 
@@ -42,14 +47,16 @@ namespace SnazzCraft
             return true;
         }
 
-    private:
+    protected:
+        Texture(); // Emmediatly load texture for newly created object for safety
+
         void SetTexture();
         
         inline void DeleteBoundData()
         {
             if (this->Data == nullptr) return;
 
-            delete[] this->Data;
+            delete this->Data;
             glDeleteTextures(1, this->ID);
         }
     };

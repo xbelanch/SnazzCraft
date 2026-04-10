@@ -32,7 +32,7 @@ namespace SnazzCraft
         unsigned int TextureCoordinates[ATLAS_SIZE * ATLAS_SIZE][2];
         unsigned int TextureCoordinatesCount = 0;
 
-        bool LoadAtlasCoordinates(const char* AtlasFilePath);
+        void LoadAtlasCoordinates(const char* AtlasFilePath);
     };
 
     extern SnazzCraft::VoxelTextureApplier* EngineVoxelTextureApplier;

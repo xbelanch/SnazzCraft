@@ -6,8 +6,7 @@ const char* SolidColorExtension = ".png";
 
 SnazzCraft::Texture* SnazzCraft::GenerateSolidColorTexture(std::string ColorName)
 {
-    SnazzCraft::Texture* SolidColorTexture = new SnazzCraft::Texture();
-    SolidColorTexture->LoadTexture(std::string(SolidColorDirectory + ColorName + SolidColorExtension).c_str());
+    SnazzCraft::Texture* SolidColorTexture = new SnazzCraft::Texture(std::string(SolidColorDirectory + ColorName + SolidColorExtension).c_str());
 
     return SolidColorTexture;
 }

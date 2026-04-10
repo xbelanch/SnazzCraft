@@ -13,7 +13,6 @@
 #include "glm/gtc/type_ptr.hpp"
 
 #include "snazzcraft-engine/gui/main-menu-gui.hpp"
-#include "snazzcraft-engine/gui/world-gui.hpp"
 #include "snazzcraft-engine/input-handler/events.h"
 #include "snazzcraft-engine/input-handler/event.hpp"
 #include "snazzcraft-engine/input-handler/data-types.h"
@@ -53,9 +52,6 @@ namespace SnazzCraft
 inline void FrameBufferSizeCallBack(GLFWwindow* Window, int Width, int Height)
 {
 	glViewport(0, 0, Width, Height);
-
-    SnazzCraft::MenuGUI->Resize(Width, Height);
-    SnazzCraft::WorldGUI->Resize(Width, Height);
 }
 
 inline void MouseButtonCallback(GLFWwindow* Window, int Button, int Action, int Mods)
@@ -78,18 +74,18 @@ inline void MouseButtonCallback(GLFWwindow* Window, int Button, int Action, int 
 
     switch (SnazzCraft::UserMode) {
         case SNAZZCRAFT_USER_MODE_WORLD:
-            NewEvent->EventData->Items.push_back(static_cast<void*>(SnazzCraft::WorldGUI));
-            NewEvent->EventData->Types.push_back(SNAZZCRAFT_DATA_TYPE_GUI_ADDRESS);
+            //NewEvent->EventData->Items.push_back(static_cast<void*>(SnazzCraft::WorldGUI));
+            //NewEvent->EventData->Types.push_back(SNAZZCRAFT_DATA_TYPE_GUI_ADDRESS);
 
-            SnazzCraft::WorldGUI->GUIInputHandler->EventQueue.push_back(NewEvent);
+            //SnazzCraft::WorldGUI->GUIInputHandler->EventQueue.push_back(NewEvent);
 
             break;
 
         case SNAZZCRAFT_USER_MODE_MAIN_MENU:
-            NewEvent->EventData->Items.push_back(static_cast<void*>(SnazzCraft::MenuGUI));
-            NewEvent->EventData->Types.push_back(SNAZZCRAFT_DATA_TYPE_GUI_ADDRESS);
+            //NewEvent->EventData->Items.push_back(static_cast<void*>(SnazzCraft::MenuGUI));
+            //NewEvent->EventData->Types.push_back(SNAZZCRAFT_DATA_TYPE_GUI_ADDRESS);
 
-            SnazzCraft::MenuGUI->GUIInputHandler->EventQueue.push_back(NewEvent); 
+            //SnazzCraft::MenuGUI->GUIInputHandler->EventQueue.push_back(NewEvent); 
 
             break;
     }

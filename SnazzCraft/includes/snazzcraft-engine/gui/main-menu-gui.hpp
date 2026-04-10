@@ -1,30 +1,26 @@
 #pragma once
 
-#include "glad.h"
-#include "glfw3.h"
-
 #include "snazzcraft-engine/gui/gui.hpp"
 
 namespace SnazzCraft
 {
-    class MainMenuGUI : public SnazzCraft::GUI
+    class MainMenuGUI : public GUI
     {
     public:
+        ~MainMenuGUI() = default;
 
-
-        MainMenuGUI(unsigned int WindowWidth, unsigned int WindowHeight, GLFWwindow* Window);
-
-        
-
+    protected:
+        MainMenuGUI();
 
     private:
 
 
+    public:
+        static inline const MainMenuGUI& GetInstance()
+        {
+            static SnazzCraft::MainMenuGUI Instance;
+            return Instance;
+        }
+
     };
-
-    extern SnazzCraft::MainMenuGUI* MenuGUI;
 } // SnazzCraft
-
-
-
-

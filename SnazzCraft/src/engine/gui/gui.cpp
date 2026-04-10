@@ -1,47 +1,52 @@
 #include "snazzcraft-engine/gui/gui.hpp"
-#include "snazzcraft-engine/gui/widget-collection.hpp"
-#include "snazzcraft-engine/gui/button.hpp"
+#include "snazzcraft-engine/gui/panel/panel.hpp"
+#include "snazzcraft-engine/gui/button/button.hpp"
+
+#include "shader_s.h"
+#include "glad.h"
 
 constexpr const char* GUIVertexShaderFilePath   = "src/engine/shaders/gui/vertex-shader.glsl";
 constexpr const char* GUIFragmentShaderFilePath = "src/engine/shaders/gui/fragment-shader.glsl";
 
-SnazzCraft::GUI::GUI(unsigned int WindowWidth, unsigned int WindowHeight)
+SnazzCraft::GUI::GUI()
 {
     this->GUIShader = new Shader(GUIVertexShaderFilePath, GUIFragmentShaderFilePath);
     this->GUIShader->use();
     
     this->OrthographicLock = glGetUniformLocation(this->GUIShader->ID, "OrthographicProjection");
 
-    this->Resize(WindowWidth, WindowHeight);
+    this->Resize(900u, 900u);
 }
 
 SnazzCraft::GUI::~GUI()
 {
-    delete this->GUIShader;
-    delete this->GUIInputHandler;
-    
-    for (SnazzCraft::WidgetCollection* Collection : this->WidgetCollections) {
-        delete Collection;
+    for (SnazzCraft::Panel* Panel : this->Panels) {
+        delete Panel;
     }
+
+    for (SnazzCraft::Button* Button : this->Buttons) {
+        delete Button;
+    }
+
 }
 
-void SnazzCraft::GUI::Render()
+void SnazzCraft::GUI::Resize(uint32_t Width, uint32_t Height)
 {
     this->GUIShader->use();
-
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_CULL_FACE);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-    this->WidgetCollections[this->ActiveWidgetCollectionIndex]->Draw();
+    this->OrthographicProjectionMatrix = glm::ortho(0.0f, static_cast<float>(Width), static_cast<float>(Height), 0.0f, -1.0f, 1.0f);  
+    glUniformMatrix4fv(this->OrthographicLock, 1, GL_FALSE, glm::value_ptr(this->OrthographicProjectionMatrix));
 }
 
-void SnazzCraft::GUI::SendEventToButtons(SnazzCraft::Event* Event)
+void SnazzCraft::GUI::ProtectedDraw() const
 {
-    if (this->WidgetCollections[this->ActiveWidgetCollectionIndex] == nullptr) return;
-   
-    for (SnazzCraft::Button* Button : this->WidgetCollections[this->ActiveWidgetCollectionIndex]->Buttons) {
-        Button->HandleClick(Event); 
+    glDisable(GL_DEPTH_TEST);
+
+    for (SnazzCraft::Panel* Panel : this->Panels) {
+        Panel->Draw();
+    }
+
+    for (SnazzCraft::Button* Button : this->Buttons) {
+        Button->Draw();
     }
 }
 

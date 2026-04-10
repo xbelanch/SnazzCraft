@@ -2,14 +2,9 @@
 
 SnazzCraft::Texture* SnazzCraft::VoxelTextureAtlas = nullptr;
 
-SnazzCraft::Texture::Texture()
+SnazzCraft::Texture::Texture(std::string FilePath)
 {
-    this->ID = new unsigned int;
-}
-
-SnazzCraft::Texture::Texture(const char* FilePath)
-{
-    this->ID = new unsigned int;
+    this->ID = new uint32_t;
 
     this->LoadTexture(FilePath);
 }
@@ -21,66 +16,23 @@ SnazzCraft::Texture::~Texture()
     delete this->ID;
 }
 
-void SnazzCraft::Texture::LoadTexture(const char* FilePath)
+void SnazzCraft::Texture::LoadTexture(std::string FilePath)
 {
     this->DeleteBoundData();
 
-    this->Data = stbi_load(FilePath, &this->Dimensions[0], &this->Dimensions[1], &this->NRChannels, 0);
+    this->Data = stbi_load(FilePath.c_str(), &this->Dimensions[0], &this->Dimensions[1], &this->NRChannels, 0);
     this->SetTexture();
 }
 
-void SnazzCraft::Texture::CreateTextureFromString(std::string Text, unsigned char R, unsigned char G, unsigned char B)
+SnazzCraft::Texture::Texture()
 {
-    this->DeleteBoundData();
-
-    this->Dimensions[0] = Text.length() * SNAZZCRAFT_CHARACTER_BITWISE_WIDTH;
-    this->Dimensions[1] = SNAZZCRAFT_CHARACTER_BITWISE_HEIGHT;
-
-    const unsigned char Alpha = 255;
-    this->Data = new unsigned char[this->Dimensions[0] * SNAZZCRAFT_CHARACTER_BITWISE_HEIGHT * NRChannels];
-
-    auto WriteCharData = [this, R, G, B, Alpha](std::string Text, unsigned int CharIndex) -> void
-    {
-        char Character = std::tolower(Text[CharIndex]);
-
-        const std::string FilePath = [&]() -> std::string
-        {
-            switch (Character) // Special cases
-            {
-                case ' ':
-                    return "textures/gui/font/space.txt";
-                    break;
-
-                default:
-                    return std::string("textures/gui/font/") + Character + ".txt";
-                    break;
-            }
-        }();
-        
-
-        std::ifstream CharacterFile(FilePath);
-        for (unsigned int Y = 0; Y < SNAZZCRAFT_CHARACTER_BITWISE_HEIGHT; Y++) {
-            std::string Line;
-            std::getline(CharacterFile, Line);
-            
-            for (unsigned int X = 0; X < SNAZZCRAFT_CHARACTER_BITWISE_WIDTH; X++) {
-                unsigned int Index = (Y * this->Dimensions[0] + (CharIndex * SNAZZCRAFT_CHARACTER_BITWISE_WIDTH + X)) * NRChannels;
-
-                this->Data[Index + 0] = CharacterFile.is_open() && Line[X] == '1' && this->NRChannels >= 1 ? R     : 0;
-                this->Data[Index + 1] = CharacterFile.is_open() && Line[X] == '1' && this->NRChannels >= 2 ? G     : 0;
-                this->Data[Index + 2] = CharacterFile.is_open() && Line[X] == '1' && this->NRChannels >= 3 ? B     : 0;
-                this->Data[Index + 3] = CharacterFile.is_open() && Line[X] == '1' && this->NRChannels >= 4 ? Alpha : 0;
-            }
-        }
-    };
-
-    for (unsigned int I = 0; I < Text.length(); I++) { WriteCharData(Text, I); }
-
-    this->SetTexture();
+    
 }
 
 void SnazzCraft::Texture::SetTexture()
 {
+    if (this->ID == nullptr) return;
+
     glGenTextures(1, &*this->ID);
     glBindTexture(GL_TEXTURE_2D, *this->ID);
 

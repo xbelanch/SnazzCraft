@@ -133,11 +133,11 @@ bool SnazzCraft::Initiate()
 
     SnazzCraft::VoxelMesh->ScaleVector = { (float)(SnazzCraft::Voxel::Size) / 2, (float)(SnazzCraft::Voxel::Size) / 2, (float)(SnazzCraft::Voxel::Size) / 2 };
 
-    SnazzCraft::MenuGUI = new SnazzCraft::MainMenuGUI(900, 900, SnazzCraft::Window);
-    SnazzCraft::MenuGUI->GUIInputHandler->Callback = MainMenuCallback;
+    //SnazzCraft::MenuGUI = new SnazzCraft::MainMenuGUI(900, 900, SnazzCraft::Window);
+    //SnazzCraft::MenuGUI->GUIInputHandler->Callback = MainMenuCallback;
 
-    SnazzCraft::WorldGUI = new SnazzCraft::InWorldGUI(900, 900, SnazzCraft::Window);
-    SnazzCraft::WorldGUI->GUIInputHandler->Callback = WorldInputCallback;
+    //SnazzCraft::WorldGUI = new SnazzCraft::InWorldGUI(900, 900, SnazzCraft::Window);
+    //SnazzCraft::WorldGUI->GUIInputHandler->Callback = WorldInputCallback;
 
     return true;
 }
@@ -155,13 +155,13 @@ void SnazzCraft::MainLoop()
         switch (SnazzCraft::UserMode)
         {
             case SNAZZCRAFT_USER_MODE_WORLD:
-                if (SnazzCraft::CurrentWorld == nullptr || SnazzCraft::WorldGUI == nullptr) break;
+                if (SnazzCraft::CurrentWorld == nullptr) break;
 
                 SnazzCraft::CurrentWorld->ApplyGravityToAllEntities();
 
                 // Poll and handle events
-                SnazzCraft::WorldGUI->GUIInputHandler->PollEvents();
-                SnazzCraft::WorldGUI->GUIInputHandler->HandleEvents();
+                //SnazzCraft::WorldGUI->GUIInputHandler->PollEvents();
+                //SnazzCraft::WorldGUI->GUIInputHandler->HandleEvents();
 
                 // Render
                 SnazzCraft::VoxelShader->use(); 
@@ -170,16 +170,16 @@ void SnazzCraft::MainLoop()
                 glUniformMatrix4fv(SnazzCraft::ViewLock, 1, GL_FALSE, glm::value_ptr(SnazzCraft::ViewMatrix));
                 
                 RenderWorld();
-                SnazzCraft::WorldGUI->Render();
+                //SnazzCraft::WorldGUI->Render();
 
                 break;
 
             case SNAZZCRAFT_USER_MODE_MAIN_MENU:
-                if (SnazzCraft::MenuGUI == nullptr) break;
-
-                SnazzCraft::MenuGUI->GUIInputHandler->PollEvents();
-                SnazzCraft::MenuGUI->GUIInputHandler->HandleEvents();
-                SnazzCraft::MenuGUI->Render();
+                const SnazzCraft::MainMenuGUI& Instance = SnazzCraft::MainMenuGUI::GetInstance();
+                //SnazzCraft::MenuGUI->GUIInputHandler->PollEvents();
+                //SnazzCraft::MenuGUI->GUIInputHandler->HandleEvents();
+                
+                Instance.Draw();
 
                 break;
         }
@@ -202,8 +202,6 @@ void SnazzCraft::FreeResources()
     delete SnazzCraft::VoxelMesh;
     delete SnazzCraft::EngineVoxelTextureApplier;
     delete SnazzCraft::CurrentWorld;
-    delete SnazzCraft::MenuGUI;
-    delete SnazzCraft::WorldGUI;
     delete SnazzCraft::VoxelTextureAtlas;
     delete SnazzCraft::GlobalFPSTracker;
     
@@ -242,10 +240,10 @@ void RenderWorld()
 
 void WorldInputCallback(SnazzCraft::Event* Event)
 {
-    static uint8_t VoxelIDToPlace = 0;
+    //static uint8_t VoxelIDToPlace = 0;
 
     if (SnazzCraft::CurrentWorld == nullptr) return;
-
+    /*
     if (!SnazzCraft::WorldGUI->InInventory) { // Not in inventory
         switch (Event->Type)
         {
@@ -406,21 +404,22 @@ void WorldInputCallback(SnazzCraft::Event* Event)
             default:
                 break;
         }
-    }
+    */
 }
 
 void MainMenuCallback(SnazzCraft::Event* Event)
 {
+    //const SnazzCraft::MainMenuGUI& Instance = SnazzCraft::MainMenuGUI::GetInstance();
+
     switch (Event->Type)
     {
         case SNAZZCRAFT_EVENT_MOUSE_CLICK_LEFT_PRESS:
         {
-            SnazzCraft::MenuGUI->SendEventToButtons(Event);
+            //SnazzCraft::MenuGUI->SendEventToButtons(Event);
             break;
         }
     }
 }
-
 
 
 

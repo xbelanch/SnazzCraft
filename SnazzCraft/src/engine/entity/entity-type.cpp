@@ -7,9 +7,8 @@
 
 SnazzCraft::Mesh* SnazzCraft::EntityType::Meshes[256];
 uint8_t SnazzCraft::EntityType::MeshesLoaded = 0x00;
-#define MESH_TEST_CUBE              (0x00)
-#define MESH_TEST_RECTANGULAR_PRISM (0x01)
-#define MESH_CATTLE                 (0x02)
+#define MESH_TEST_RECTANGULAR_PRISM (0x00)
+#define MESH_CATTLE                 (0x01)
 
 SnazzCraft::Texture* SnazzCraft::EntityType::Textures[256];
 uint8_t SnazzCraft::EntityType::TexturesLoaded = 0x00;
