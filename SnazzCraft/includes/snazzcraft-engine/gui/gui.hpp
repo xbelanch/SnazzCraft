@@ -75,8 +75,10 @@ namespace SnazzCraft
         
         SnazzCraft::InputHandler InputHandler;
 
+        virtual void ProtectedDraw() const;
+
     private:
-        virtual void ProtectedDraw() const; 
+
 
     };
 } // SnazzCraft
